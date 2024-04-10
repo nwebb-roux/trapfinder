@@ -1,0 +1,6 @@
+DEBUG TODO
+- Stop long A press from carrying over to new dungeon screen and triggering stairs up
+- Fix wall clip on multiple button press
+- Stop screen wrapping
+- Turn off sprite masking at top and left
+- Fix math of stairs down check, and possibly stairs up check (do the stop wrapping step first, that will affect this math). Seems like being in the top right corner can trigger stairs up if X+16 wraps around?

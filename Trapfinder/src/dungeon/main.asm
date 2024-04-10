@@ -3,7 +3,7 @@
 .include "../macros/state.asm"
 
 .segment "ZEROPAGE"
-.importzp screen_state
+.importzp screen_state, buttons, new_buttons
 
 .segment "CODE"
 .export load_dungeon_screen
@@ -12,12 +12,11 @@
 	LDX #%00
 	STX PPUMASK
 
-	SetDungeonState
+	; reset controller buttons
+	STX buttons
+	STX new_buttons
 
-	; determine floor and set state (cavern, dungeon, marble, etc.)
-	; for now it's HARDCODED
-	LDX #$03
-	STX DUNGEON_FLOOR
+	SetDungeonState
 
 	; move all sprites offscreen
 	; TODO move this to a macro or subroutine that all mains can call

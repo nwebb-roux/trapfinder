@@ -1,4 +1,5 @@
 .include "../includes/constants.inc"
+.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing, treasure_flags, treasure_x_coords, treasure_y_coords
@@ -11,6 +12,15 @@ CheckA:
 	AND #BTN_A		; perform logical & of A (the register) against A (the button)
 	BEQ CheckB		; branch to CheckB if A was not pressed, otherwise continue to A press instructions
 	JSR check_treasure_collisions
+	JSR check_stairs_up_collision
+	; if carry is set, we did stairs up, so we're done
+	BCS HandleControllerDone
+	JSR check_stairs_down_collision
+	; if carry is clear, we didn't do stairs down, so move to next button check
+	BCC CheckB
+	; otherwise, we did stairs down, so we're done
+	JSR dungeon_logic
+	JMP HandleControllerDone
 CheckB:
 	LDA buttons
 	AND #BTN_B
@@ -25,8 +35,6 @@ CheckStart:
 	LDA new_buttons
     AND #BTN_START
     BEQ CheckUp
-	;JSR load_title_screen
-	;JSR HandleControllerDone
 	; add instructions here to do something when button is pressed
 CheckUp:
 	LDA buttons
@@ -154,5 +162,82 @@ CheckComplete:
 	RTS
 .endproc
 
+.proc check_stairs_up_collision
+	LDA avatar_x
+	CLC
+	ADC #$10
+	CMP #STAIRS_UP_X
+	BCC @noCollide
+	LDA #STAIRS_UP_X
+	CLC
+	ADC #$10
+	CMP avatar_x
+	BCC @noCollide
+	LDA avatar_y
+	CLC
+	ADC #$10
+	CMP #STAIRS_UP_Y
+	BCC @noCollide
+	LDA #STAIRS_UP_Y
+	CLC
+	ADC #$10
+	CMP avatar_y
+	BCC @noCollide
+
+	; collision occurred
+	JSR load_title_screen
+	; set carry flag for check on return
+	SEC
+	RTS
+@noCollide:
+	; clear carry flag for check on return
+	CLC
+	RTS
+.endproc
+
+.proc check_stairs_down_collision
+	LDA avatar_x
+	CLC
+	ADC #$10
+	CMP #STAIRS_DOWN_X
+	BCC @noCollide
+	LDA #STAIRS_DOWN_X
+	CLC
+	ADC #$0F
+	CMP avatar_x
+	BCC @noCollide
+	LDA avatar_y
+	CLC
+	ADC #$10
+	CMP #STAIRS_DOWN_Y
+	BCC @noCollide
+	LDA #STAIRS_DOWN_Y
+	CLC
+	ADC #$10
+	CMP avatar_y
+	BCC @noCollide
+
+	; collision occurred
+	; increment dungeon floor
+	LDX DUNGEON_FLOOR
+	INX
+	STX DUNGEON_FLOOR
+	; clear out buttons
+	LDX #$00
+	STX buttons
+	STX new_buttons
+	JSR load_dungeon_screen
+	; set carry flag for check on return
+	SEC
+	RTS
+@noCollide:
+	; clear carry flag for check on return
+	CLC
+	RTS
+.endproc
+
 .import dungeon_increment_avatar_sprite_frame
 .import draw_open_treasure
+.import load_title_screen
+.import load_dungeon_screen
+.import dungeon_logic

@@ -125,11 +125,11 @@ Done:
 .proc dungeon_draw_stairs_up
     ; **** top left tile (x, y) ****
 	; write Y
-    LDA #$D0
+    LDA #STAIRS_UP_Y
     STA $02E0
 
 	; write X
-    LDA #$00
+    LDA #STAIRS_UP_X
     STA $02E3
 
 	; write tile location
@@ -142,13 +142,11 @@ Done:
 	
     ; **** top right tile (x + 8, y) ****
 	; write Y
-    LDA #$D0
+    LDA #STAIRS_UP_Y
     STA $02E4
 
-	; write X
-    LDA #$00
-
 	; add 8 to X and write
+    LDA #STAIRS_UP_X
     CLC
     ADC #$08
     STA $02E7
@@ -162,13 +160,13 @@ Done:
 
     ; **** bottom left tile (x, y + 8) ****
 	; add 8 to Y and write
-    LDA #$D0
+    LDA #STAIRS_UP_Y
     CLC
     ADC #$08
     STA $02E8
 
 	; write X (the original, not the +8 version)
-    LDA #$00
+    LDA #STAIRS_UP_X
     STA $02EB
 
 	; increment tile location and write
@@ -180,13 +178,13 @@ Done:
 
     ; **** bottom right tile (x + 8, y + 8) ****
 	; add 8 to Y and write
-    LDA #$D0
+    LDA #STAIRS_UP_Y
     CLC
     ADC #$08
     STA $02EC
 
 	; add 8 to X and write
-    LDA #$00
+    LDA #STAIRS_UP_X
     CLC
     ADC #$08
     STA $02EF
@@ -205,11 +203,11 @@ Done:
 .proc dungeon_draw_stairs_down
     ; **** top left tile (x, y) ****
 	; write Y
-    LDA #$00
+    LDA #STAIRS_DOWN_Y
     STA $02F0
 
 	; write X
-    LDA #$F0
+    LDA #STAIRS_DOWN_X
     STA $02F3
 
 	; write tile location
@@ -222,11 +220,11 @@ Done:
 	
     ; **** top right tile (x + 8, y) ****
 	; write Y
-    LDA #$00
+    LDA #STAIRS_DOWN_Y
     STA $02F4
 
 	; write X
-    LDA #$F0
+    LDA #STAIRS_DOWN_X
 
 	; add 8 to X and write
     CLC
@@ -242,13 +240,13 @@ Done:
 
     ; **** bottom left tile (x, y + 8) ****
 	; add 8 to Y and write
-    LDA #$00
+    LDA #STAIRS_DOWN_Y
     CLC
     ADC #$08
     STA $02F8
 
 	; write X (the original, not the +8 version)
-    LDA #$F0
+    LDA #STAIRS_DOWN_X
     STA $02FB
 
 	; increment tile location and write
@@ -260,13 +258,13 @@ Done:
 
     ; **** bottom right tile (x + 8, y + 8) ****
 	; add 8 to Y and write
-    LDA #$00
+    LDA #STAIRS_DOWN_Y
     CLC
     ADC #$08
     STA $02FC
 
 	; add 8 to X and write
-    LDA #$F0
+    LDA #STAIRS_DOWN_X
     CLC
     ADC #$08
     STA $02FF

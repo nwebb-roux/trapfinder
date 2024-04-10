@@ -1,4 +1,5 @@
 .include "../includes/constants.inc"
+.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp buttons, new_buttons, avatar_y
@@ -25,6 +26,8 @@ CheckStart:
 	AND #BTN_START
 	BEQ CheckUp
 	JSR initialize_rng
+	LDX #$00
+	STX DUNGEON_FLOOR
 	JSR load_dungeon_screen
 	RTS
 CheckUp:
