@@ -32,10 +32,10 @@
 	LDA #$00
 	STA SCREEN_MAP_ATTRIBUTES, Y
 
-	; increment counters and loop if not 16 yet
+	; increment counters and loop if not 32 yet
 	INX
 	INY
-	CPY #$10
+	CPY #$20
 	BNE @top_row_loop
 
 	; save 16 to screen map location
@@ -100,9 +100,9 @@
 	CPY #$10
 	BNE @metatileLoop
 
-	; increment X for overall loop and loop if not...
+	; increment X for overall loop and loop 11 times total
 	INX
-	CPX #$0C
+	CPX #$0B
 	BNE @mid_row_loop
 
 	; reset X and Y for next loop
@@ -117,8 +117,7 @@
 	; write to screen map
 	STA SCREEN_MAP, Y
 
-	; increment counters and loop if not 16 yet
-	; NEW CHANGE compare to expected end of screen map location in Y
+	; increment counters and loop until end of screen map location in Y
 	INX
 	INY
 	CPY #$EF
