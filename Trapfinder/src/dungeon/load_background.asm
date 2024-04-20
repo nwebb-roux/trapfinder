@@ -102,7 +102,7 @@
 
 	; increment X for overall loop and loop if not...
 	INX
-	CPX #$0D
+	CPX #$0C
 	BNE @mid_row_loop
 
 	; reset X and Y for next loop
