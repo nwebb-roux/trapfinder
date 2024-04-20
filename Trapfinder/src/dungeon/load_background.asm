@@ -16,11 +16,10 @@
 	STA DUNGEON_FLOOR_OFFSET
 
 	; set loop variables
-	;LDX #$00
 	LDX DUNGEON_FLOOR_OFFSET
 	LDY #$00
 
-@top_row_loop:
+top_row_loop:
 	; get metatile
 	LDA top_row_superpatterns, X
 
@@ -35,8 +34,15 @@
 	; increment counters and loop if not 32 yet
 	INX
 	INY
+
+	; if X is 16, reset it to 0 to run through the same top row superpattern again
+	CPX #$16
+	BNE @continue_top_row_loop
+	LDX #$00
+
+@continue_top_row_loop:
 	CPY #$20
-	BNE @top_row_loop
+	BNE top_row_loop
 
 	; save 16 to screen map location
 	STY SCREEN_MAP_LOCATION

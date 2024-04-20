@@ -4,7 +4,6 @@ Do I need to write a subroutine specifically for changing dungeon levels?
 
 DUNGEON CREATE
 - First and last rows for each level
-- Account for NTSC TV, I think the top row or half-row will be cut off
 - Level 3 (palace) superpatterns
 - Distribution of chests (shouldn't be in the open box around the level)
 
