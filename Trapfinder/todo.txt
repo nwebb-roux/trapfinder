@@ -1,6 +1,24 @@
 DEBUG TODO
+
+Do I need to write a subroutine specifically for changing dungeon levels?
+
+DUNGEON CREATE
+- First and last rows for each level
+- Account for NTSC TV, I think the top row or half-row will be cut off
+- Level 3 (palace) superpatterns
+- Distribution of chests (shouldn't be in the open box around the level)
+
+CONTROLS
 - Stop long A press from carrying over to new dungeon screen and triggering stairs up
 - Fix wall clip on multiple button press
 - Stop screen wrapping
-- Turn off sprite masking at top and left
+
+INTERACTION
+- Change what counts as colliding with a chest to be able to open it?
+- Opening multiple chests at once?
+- Chests in far right column don't open (might not matter since they shouldn't be there, but still weird)
 - Fix math of stairs down check, and possibly stairs up check (do the stop wrapping step first, that will affect this math). Seems like being in the top right corner can trigger stairs up if X+16 wraps around?
+
+MISC.
+- Screen flicker on stairs down
+- Turn off sprite masking at top and left

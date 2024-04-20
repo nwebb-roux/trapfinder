@@ -15,27 +15,31 @@
 	LDA floor_offsets, X
 	STA DUNGEON_FLOOR_OFFSET
 
-	; set X for loop
-	LDX #$00
+	; set loop variables
+	;LDX #$00
+	LDX DUNGEON_FLOOR_OFFSET
+	LDY #$00
 
 @top_row_loop:
 	; get metatile
-	LDA top_row_superpattern, X
+	LDA top_row_superpatterns, X
 
 	; write to screen map
-	STA SCREEN_MAP, X
+	STA SCREEN_MAP, Y
 
 	; write zeroes to attribute map
+	; TODO GET RIGHT ATTRIBUTE
 	LDA #$00
-	STA SCREEN_MAP_ATTRIBUTES, X
+	STA SCREEN_MAP_ATTRIBUTES, Y
 
-	; increment counter and loop if not 16 yet
+	; increment counters and loop if not 16 yet
 	INX
-	CPX #$10
+	INY
+	CPY #$10
 	BNE @top_row_loop
 
 	; save 16 to screen map location
-	STX SCREEN_MAP_LOCATION
+	STY SCREEN_MAP_LOCATION
 
 	; reset X for next loop
 	LDX #$00
@@ -98,24 +102,26 @@
 
 	; increment X for overall loop and loop if not...
 	INX
-	CPX #$0C
+	CPX #$0D
 	BNE @mid_row_loop
 
 	; reset X and Y for next loop
-	LDX #$0
+	;LDX #$00
+	LDX DUNGEON_FLOOR_OFFSET
 	LDY SCREEN_MAP_LOCATION
 
 @bottom_row_loop:
 	; get metatile
-	LDA bottom_row_superpattern, X
+	LDA bottom_row_superpatterns, X
 
 	; write to screen map
 	STA SCREEN_MAP, Y
 
 	; increment counters and loop if not 16 yet
+	; NEW CHANGE compare to expected end of screen map location in Y
 	INX
 	INY
-	CPX #$10
+	CPY #$EF
 	BNE @bottom_row_loop
 
 	; make sure SCREEN_MAP_END is set to $FF
