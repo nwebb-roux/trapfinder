@@ -6,6 +6,7 @@ DUNGEON CREATE
 - First and last rows for each level
 - Level 3 (palace) superpatterns
 - Distribution of chests (shouldn't be in the open box around the level)
+- Chest seem to be 1 pixel too low?
 
 CONTROLS
 - Stop long A press from carrying over to new dungeon screen and triggering stairs up

@@ -35,10 +35,10 @@ top_row_loop:
 	INX
 	INY
 
-	; if X is 16, reset it to 0 to run through the same top row superpattern again
-	CPX #$16
+	; if Y is 16, reset X to run through the same top row superpattern again
+	CPY #$10
 	BNE @continue_top_row_loop
-	LDX #$00
+	LDX DUNGEON_FLOOR_OFFSET
 
 @continue_top_row_loop:
 	CPY #$20
@@ -112,11 +112,10 @@ top_row_loop:
 	BNE @mid_row_loop
 
 	; reset X and Y for next loop
-	;LDX #$00
 	LDX DUNGEON_FLOOR_OFFSET
 	LDY SCREEN_MAP_LOCATION
 
-@bottom_row_loop:
+bottom_row_loop:
 	; get metatile
 	LDA bottom_row_superpatterns, X
 
@@ -126,8 +125,16 @@ top_row_loop:
 	; increment counters and loop until end of screen map location in Y
 	INX
 	INY
-	CPY #$EF
-	BNE @bottom_row_loop
+
+	; if Y is 224, reset X to run through the same bottom row superpattern again
+	CPY #$E0
+	BNE @continue_bottom_row_loop
+	LDX DUNGEON_FLOOR_OFFSET
+
+@continue_bottom_row_loop:
+	; loop until screen map location is 240
+	CPY #$F0
+	BNE bottom_row_loop
 
 	; make sure SCREEN_MAP_END is set to $FF
 	LDA #$FF
