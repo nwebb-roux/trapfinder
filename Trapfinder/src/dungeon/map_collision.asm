@@ -28,6 +28,11 @@ CheckUp:
 	CLC
 	ADC #$02
 
+	; if it's 8, eject down
+	CMP #$08
+	BNE ContinueCheckUp
+	JMP eject_down
+ContinueCheckUp:
 	LSR
 	LSR
 	LSR
@@ -75,6 +80,11 @@ CheckDown:
 	CLC
 	ADC #$10
 
+	; if it's 248, eject up
+	CMP #$E8
+	BNE ContinueCheckDown
+	JMP eject_up
+ContinueCheckDown:
 	LSR
 	LSR
 	LSR
@@ -111,6 +121,11 @@ CheckLeft:
 	CLC
 	ADC #$02
 
+	; if it's 1, eject right
+	CMP #$01
+	BNE ContinueCheckLeft
+	JMP eject_right
+ContinueCheckLeft:
 	LSR
 	LSR
 	LSR
@@ -158,6 +173,11 @@ CheckRight:
 	CLC
 	ADC #$0C
 
+	; if it's 255, eject left
+	CMP #$FF
+	BNE ContinueCheckRight
+	JMP eject_left
+ContinueCheckRight:
 	LSR
 	LSR
 	LSR

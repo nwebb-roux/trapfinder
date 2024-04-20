@@ -34,8 +34,8 @@
 	LDA #%00011110	; enable sprites, enable background, no clipping on left side
 	STA PPUMASK
 	LDA #$00		; tell the PPU there's no background scrolling
-	STA $2005
-	STA $2005		; why twice? horizontal and vertical I think
+	STA PPUSCROLL
+	STA PPUSCROLL	; why twice? horizontal and vertical I think
 
 	; clear render flag so game logic will run again
 	ClearRenderFlag
