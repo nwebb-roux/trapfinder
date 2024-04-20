@@ -74,6 +74,10 @@ TreasureLoop:
 	; mask out low nybble
 	AND #%11110000
 
+	; subtract 1
+	SEC
+	SBC #$01
+
 	; save to treasure_y_coords
 	STA treasure_y_coords, Y
 
