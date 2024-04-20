@@ -26,7 +26,7 @@ CheckStart:
 	AND #BTN_START
 	BEQ CheckUp
 	JSR initialize_rng
-	LDX #$03
+	LDX #$00
 	STX DUNGEON_FLOOR
 	JSR load_dungeon_screen
 	RTS
