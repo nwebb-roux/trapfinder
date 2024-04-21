@@ -5,9 +5,6 @@ Do I need to write a subroutine specifically for changing dungeon levels?
 DUNGEONS
 - Fix palette issue in marble floor--I think it's just junk metatiles in the superpatterns?
 
-CONTROLS
-- Fix wall clip on multiple button press
-
 INTERACTION
 - Change what counts as colliding with a chest to be able to open it?
 - Opening multiple chests at once?

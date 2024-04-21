@@ -31,7 +31,8 @@ CheckUp:
 	; if it's 8, eject down
 	CMP #$08
 	BNE ContinueCheckUp
-	JMP eject_down
+	JSR eject_down
+	JMP CheckDown
 ContinueCheckUp:
 	LSR
 	LSR
@@ -41,8 +42,11 @@ ContinueCheckUp:
 
 	; test the top left point
 	JSR test_collision
+
+	; eject if carry flag was set to indicate collision
 	BCC NoCollideUp
-	JMP eject_down ; jump if carry flag was set to indicate collision
+	JSR eject_down
+	JMP CheckDown
 NoCollideUp:
 	; calculate the right X coordinate
 	LDA avatar_x
@@ -58,7 +62,7 @@ NoCollideUp:
 	; test the top right point
 	JSR test_collision
 	BCC CheckDown
-	JMP eject_down ; branch if carry flag was set to indicate collision
+	JSR eject_down
 CheckDown:
 	LDA buttons
 	AND #BTN_DOWN
@@ -83,7 +87,8 @@ CheckDown:
 	; if it's 248, eject up
 	CMP #$E8
 	BNE ContinueCheckDown
-	JMP eject_up
+	JSR eject_up
+	JMP CheckLeft
 ContinueCheckDown:
 	LSR
 	LSR
@@ -94,7 +99,8 @@ ContinueCheckDown:
 	; test the bottom left point
 	JSR test_collision
 	BCC NoCollideDown
-	JMP eject_up ; jump if carry flag was set to indicate collision
+	JSR eject_up
+	JMP CheckLeft
 NoCollideDown:
 	; calculate the right X coordinate
 	LDA avatar_x
@@ -110,7 +116,7 @@ NoCollideDown:
 	; test the bottom right point
 	JSR test_collision
 	BCC CheckLeft
-	JMP eject_up ; jump if carry flag was set to indicate collision
+	JSR eject_up ; jump if carry flag was set to indicate collision
 CheckLeft:
 	LDA buttons
 	AND #BTN_LEFT
@@ -124,7 +130,8 @@ CheckLeft:
 	; if it's 1, eject right
 	CMP #$01
 	BNE ContinueCheckLeft
-	JMP eject_right
+	JSR eject_right
+	JMP CheckRight
 ContinueCheckLeft:
 	LSR
 	LSR
@@ -146,7 +153,8 @@ ContinueCheckLeft:
 	; test the top left point
 	JSR test_collision
 	BCC NoCollideLeft
-	JMP eject_right ; jump if carry flag was set to indicate collision
+	JSR eject_right
+	JMP CheckRight
 NoCollideLeft:
 	; calculate the bottom Y coordinate
 	LDA avatar_y
@@ -162,7 +170,7 @@ NoCollideLeft:
 	; test the bottom left point
 	JSR test_collision
 	BCC CheckRight
-	JMP eject_right ; jump if carry flag was set to indicate collision
+	JSR eject_right
 CheckRight:
 	LDA buttons
 	AND #BTN_RIGHT
@@ -176,7 +184,8 @@ CheckRight:
 	; if it's 255, eject left
 	CMP #$FF
 	BNE ContinueCheckRight
-	JMP eject_left
+	JSR eject_left
+	JMP HandleCollisionDone
 ContinueCheckRight:
 	LSR
 	LSR
@@ -198,7 +207,8 @@ ContinueCheckRight:
 	; test the top right point
 	JSR test_collision
 	BCC NoCollideRight
-	JMP eject_left ; jump if carry flag was set to indicate collision
+	JSR eject_left ; jump if carry flag was set to indicate collision
+	JMP HandleCollisionDone
 NoCollideRight:
 	; calculate the bottom Y coordinate
 	LDA avatar_y
@@ -214,7 +224,7 @@ NoCollideRight:
 	; test the bottom right point
 	JSR test_collision
 	BCC HandleCollisionDone
-	JMP eject_left ; jump if carry flag was set to indicate collision
+	JSR eject_left ; jump if carry flag was set to indicate collision
 HandleCollisionDone:
 	RTS
 .endproc
