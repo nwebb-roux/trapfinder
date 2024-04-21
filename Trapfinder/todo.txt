@@ -2,8 +2,10 @@ DEBUG TODO
 
 Do I need to write a subroutine specifically for changing dungeon levels?
 
+DUNGEONS
+- Fix palette issue in marble floor--I think it's just junk metatiles in the superpatterns?
+
 CONTROLS
-- Stop long A press from carrying over to new dungeon screen and triggering stairs up
 - Fix wall clip on multiple button press
 
 INTERACTION

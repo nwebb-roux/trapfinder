@@ -8,7 +8,7 @@
 .export dungeon_handle_controller
 .proc dungeon_handle_controller
 CheckA:
-	LDA buttons		; load contents of controller 1 button variable into A
+	LDA new_buttons		; load contents of controller 1 button variable into A
 	AND #BTN_A		; perform logical & of A (the register) against A (the button)
 	BEQ CheckB		; branch to CheckB if A was not pressed, otherwise continue to A press instructions
 	JSR check_treasure_collisions
@@ -184,8 +184,9 @@ CheckComplete:
 	CMP avatar_y
 	BCC @noCollide
 
-	; collision occurred
+	; collision occurred, go to title screen
 	JSR load_title_screen
+
 	; set carry flag for check on return
 	SEC
 	RTS
@@ -217,16 +218,12 @@ CheckComplete:
 	CMP avatar_y
 	BCC @noCollide
 
-	; collision occurred
-	; increment dungeon floor
+	; collision occurred, increment dungeon floor and reload
 	LDX DUNGEON_FLOOR
 	INX
 	STX DUNGEON_FLOOR
-	; clear out buttons
-	LDX #$00
-	STX buttons
-	STX new_buttons
 	JSR load_dungeon_screen
+
 	; set carry flag for check on return
 	SEC
 	RTS

@@ -13,7 +13,6 @@
 	STX PPUMASK
 
 	; reset controller buttons
-	STX buttons
 	STX new_buttons
 
 	SetDungeonState
