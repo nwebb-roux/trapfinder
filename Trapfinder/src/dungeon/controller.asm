@@ -197,21 +197,29 @@ CheckComplete:
 .endproc
 
 .proc check_stairs_down_collision
+	; if right side of avatar is less than STAIRS_DOWN_X, no collide
 	LDA avatar_x
 	CLC
-	ADC #$10
+	ADC #$0D
 	CMP #STAIRS_DOWN_X
 	BCC @noCollide
+
+	; if right side of stairs is less than avatar x, no collide
 	LDA #STAIRS_DOWN_X
 	CLC
 	ADC #$0F
 	CMP avatar_x
 	BCC @noCollide
+
+	; if bottom of avatar is less than STAIRS_DOWN_Y, no collide
 	LDA avatar_y
 	CLC
 	ADC #$10
 	CMP #STAIRS_DOWN_Y
 	BCC @noCollide
+
+
+	; if bottom of stairs is less than avatar y, no collide
 	LDA #STAIRS_DOWN_Y
 	CLC
 	ADC #$10

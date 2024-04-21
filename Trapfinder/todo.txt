@@ -2,14 +2,9 @@ DEBUG TODO
 
 Do I need to write a subroutine specifically for changing dungeon levels?
 
-DUNGEONS
-- Fix palette issue in marble floor--I think it's just junk metatiles in the superpatterns?
-
 INTERACTION
 - Change what counts as colliding with a chest to be able to open it?
 - Opening multiple chests at once?
-- Chests in far right column don't open (might not matter since they shouldn't be there, but still weird)
-- Fix math of stairs down check, and possibly stairs up check (do the stop wrapping step first, that will affect this math). Seems like being in the top right corner can trigger stairs up if X+16 wraps around?
 
 MISC.
 - Screen flicker on stairs down
