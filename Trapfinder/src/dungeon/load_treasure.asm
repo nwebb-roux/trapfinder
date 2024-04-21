@@ -7,9 +7,10 @@
 .segment "CODE"
 .export populate_treasure
 .proc populate_treasure
-	; reset loop counters: X is position in screen map, Y is position in treasure pool
-	LDX #$10
+	; begin loop counters: X is position in screen map, Y is position in treasure pool, COUNTER_X is position in row (0-15)
+	LDX #$20
 	LDY #$00
+	STY COUNTER_X
 
 	; TODO: CLEAR TREASURE POOL?
 
@@ -18,10 +19,25 @@ TreasureLoop:
 	CPY #$05
 	BEQ TreasureDone
 
+	; if position in screen map is 208 (first metatile of bottom rows) we're done
+	CPX #$D0
+	BEQ TreasureDone
+
+	; load position in current row
+	LDA COUNTER_X
+
+	; if we're at metatile 0 or 15 in the row, don't generate treasure for this metatile
+	CMP #$00
+	BEQ NextLoop
+
+	CMP #$0F
+	BEQ NextLoop
+
 	; load metatile into A
 	LDA SCREEN_MAP, X
 
 	; if SCREEN_MAP gave us $FF, we reached the end, break out
+	; (this probably shouldn't ever happen because of the previous check, but whatevs)
 	CMP #$FF
 	BEQ TreasureDone
 
@@ -89,7 +105,7 @@ TreasureLoop:
 	ORA #%10000000
 
 	; TODO generate random 0-1 and put it in bit 1 to represent trap yes/no
-	; TODO if trap, generate random 0-7 and put it in bits 2 and 3--trap type
+	; TODO if trap, generate random 0-7 and put it in bits 2 and 3--trap type (trap = 0-3 plus dungeon floor?)
 	; TODO use dungeon floor and trap presence/type to alter random treasure roll
 
 	; load treasure count back into Y
@@ -100,10 +116,25 @@ TreasureLoop:
 
 	; increment treasure count
 	INY
-
+	
 NextLoop:
-	; increment screen map counter and go to start of loop
+	; increment screen map counter
 	INX
+
+	; increment position in current row
+	LDA COUNTER_X
+	CLC
+	ADC #$01
+	STA COUNTER_X
+
+	; if row position is 16, reset it to 0
+	CMP #$10
+	BNE NoResetRow
+	LDA #$00
+	STA COUNTER_X
+
+NoResetRow:
+	; go to start of loop
 	JMP TreasureLoop
 
 TreasureDone:

@@ -2,10 +2,6 @@ DEBUG TODO
 
 Do I need to write a subroutine specifically for changing dungeon levels?
 
-DUNGEON CREATE
-- Level 3 (palace) superpatterns
-- Distribution of chests (shouldn't be in the open box around the level)
-
 CONTROLS
 - Stop long A press from carrying over to new dungeon screen and triggering stairs up
 - Fix wall clip on multiple button press
