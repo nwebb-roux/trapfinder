@@ -5,6 +5,22 @@
 .importzp treasure_flags, treasure_x_coords, treasure_y_coords
 
 .segment "CODE"
+.export clear_treasure
+.proc clear_treasure
+	LDA #$00
+	LDX #$00
+ClearTreasureLoop:
+	STA treasure_x_coords, X
+	STA treasure_y_coords, X
+	STA treasure_flags, X
+
+	INX
+	CPX #$05
+	BNE ClearTreasureLoop
+
+	RTS
+.endproc
+
 .export populate_treasure
 .proc populate_treasure
 	; begin loop counters: X is position in screen map, Y is position in treasure pool, COUNTER_X is position in row (0-15)

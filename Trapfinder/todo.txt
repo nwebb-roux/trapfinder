@@ -1,6 +1,9 @@
 DEBUG TODO
 
-Do I need to write a subroutine specifically for changing dungeon levels?
+LAST ROUND
+- Make open tiles in underworld level more scattered, rather than multiples of a type in a row
+- Chests being put on block tiles! Seems to happen often in underworld and sometimes in palace?
+- Change marble stairs palette
 
 INTERACTION
 - Change what counts as colliding with a chest to be able to open it?

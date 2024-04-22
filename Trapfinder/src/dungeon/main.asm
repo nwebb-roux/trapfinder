@@ -31,6 +31,7 @@
 	JSR load_dungeon_palettes
 	JSR load_dungeon_map
 	JSR load_dungeon_map_attributes
+	JSR clear_treasure
 	JSR populate_treasure
 
 	JSR draw_dungeon_background
@@ -82,6 +83,7 @@ bankvalues:
 .import draw_dungeon_attributes
 .import dungeon_draw_stairs_up
 .import dungeon_draw_stairs_down
+.import clear_treasure
 .import populate_treasure
 .import draw_treasure
 .import load_avatar_sprite
