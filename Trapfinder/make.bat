@@ -11,6 +11,10 @@ ca65 src\core\irq.asm
 ca65 src\core\controller.asm
 ca65 src\core\rng.asm
 
+:: Audio
+ca65 src/audio/famistudio_ca65.s
+ca65 src/audio/audio.asm
+
 :: Title Screen
 ca65 src\title_screen\main.asm
 ca65 src\title_screen\load_palettes.asm

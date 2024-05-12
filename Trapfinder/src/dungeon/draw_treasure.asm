@@ -1,8 +1,10 @@
 .include "maps.inc"
-.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp treasure_flags, treasure_x_coords, treasure_y_coords
+
+.segment "BSS"
+.import COLLISION_TABLE, COUNTER
 
 .segment "CODE"
 .export draw_treasure

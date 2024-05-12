@@ -1,5 +1,8 @@
 .include "../includes/constants.inc"
 
+.segment "ZEROPAGE"
+.importzp timer
+
 .segment "CODE"
 .export load_title_screen_palettes
 .proc load_title_screen_palettes
@@ -29,8 +32,33 @@ LoadSpritePaletteLoop:
     RTS
 .endproc
 
+.proc WaitASec
+    ; reset counter
+    LDY #$00
+
+    SEI
+
+OneSecondLoop:
+    LDA timer
+@pause_loop:
+    ; loop until timer changes
+    ; this should happen 60 times a second
+    CMP timer
+    BEQ @pause_loop
+
+    ; increment the counter and break if it's 60
+    INY
+    CPY #$3C
+    BEQ Break
+
+    ; if not, keep looping
+    JMP OneSecondLoop
+Break:
+    RTS
+.endproc
+
 .segment "RODATA"
 background_palette:
-.byte $0F,$29,$15,$06, $0F,$29,$1A,$11, $0F,$29,$1A,$11, $0F,$00,$10,$30
+.byte $0F,$37,$04,$04, $0F,$37,$16,$27, $0F,$29,$1A,$30, $0F,$10,$30,$00
 sprite_palette:
 .byte $0F,$19,$2A,$3B, $0F,$15,$25,$30, $0F,$02,$12,$31, $0F,$04,$15,$24

@@ -1,8 +1,10 @@
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp buttons, new_buttons, avatar_y
+
+.segment "BSS"
+.import DUNGEON_FLOOR
 
 .segment "CODE"
 .export title_screen_handle_controller

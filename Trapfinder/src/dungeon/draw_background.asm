@@ -1,6 +1,8 @@
 .include "maps.inc"
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
+
+.segment "BSS"
+.import DUNGEON_FLOOR, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_SECOND_PASS, COUNTER
 
 .segment "CODE"
 .export draw_dungeon_background

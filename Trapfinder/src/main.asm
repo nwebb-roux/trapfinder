@@ -1,6 +1,7 @@
 .include "includes/constants.inc"
 .include "includes/header.inc"
 .include "includes/zero_page.inc"
+.include "includes/ram_map.inc"
 .include "macros/state.asm"
 
 .segment "ZEROPAGE"
@@ -15,6 +16,7 @@
 .export main
 .proc main
 	; do any first-time init
+	JSR audio_init
 	JSR load_title_screen
 game_loop:
 	JSR read_controller
@@ -46,6 +48,7 @@ run_loop:
 	JSR game_loop
 .endproc
 
+.import audio_init
 .import load_title_screen
 .import read_controller
 .import title_screen_logic

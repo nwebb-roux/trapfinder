@@ -1,7 +1,9 @@
 .include "palettes.inc"
 .include "maps.inc"
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
+
+.segment "BSS"
+.import DUNGEON_FLOOR
 
 .segment "CODE"
 .export load_dungeon_palettes

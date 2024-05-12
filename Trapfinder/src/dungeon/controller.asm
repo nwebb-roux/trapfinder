@@ -1,8 +1,10 @@
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing, treasure_flags, treasure_x_coords, treasure_y_coords
+
+.segment "BSS"
+.import DUNGEON_FLOOR
 
 .segment "CODE"
 .export dungeon_handle_controller

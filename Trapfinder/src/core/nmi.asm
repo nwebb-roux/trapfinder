@@ -15,7 +15,7 @@
 
 	; if render flag is false, skip rendering and return
 	BIT screen_state
-	BPL @return
+	BPL Return
 
 	; **** NMI INTERRUPT ****
 	; during each NMI interrupt, we update the sprite data in the PPU's OAM tables
@@ -40,6 +40,9 @@
 	; clear render flag so game logic will run again
 	ClearRenderFlag
 
-@return:
+	JSR famistudio_update
+Return:
 	RTI				; return from the NMI interrupt
 .endproc
+
+.import famistudio_update

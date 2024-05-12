@@ -14,7 +14,7 @@
 	LDX #$00
 @sprite_reset_loop:
 	LDA #$FE
-	STA $0200, x
+	STA $0200, X
 	INX
 	BNE @sprite_reset_loop
 
@@ -26,6 +26,8 @@
 	; turn PPU back on
 	LDA PPUMASK_STANDARD
 	STA PPUMASK
+
+	JSR audio_title_screen
 
 	RTS
 .endproc
@@ -55,3 +57,4 @@ bankvalues:
 .import load_title_screen_jewel_sprite
 .import title_screen_handle_controller
 .import title_screen_draw_jewel_sprite
+.import audio_title_screen

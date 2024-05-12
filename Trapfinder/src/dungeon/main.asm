@@ -1,5 +1,4 @@
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
 .include "../macros/state.asm"
 
 .segment "ZEROPAGE"
@@ -45,6 +44,8 @@
 	; turn PPU back on
 	LDA PPUMASK_STANDARD
 	STA PPUMASK
+
+	JSR audio_dungeon
 
 	RTS
 .endproc
@@ -94,3 +95,5 @@ bankvalues:
 .import dungeon_handle_background_collision
 .import dungeon_draw_avatar_sprite
 .import dungeon_update_avatar_sprite
+
+.import audio_dungeon

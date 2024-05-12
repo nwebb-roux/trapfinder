@@ -5,7 +5,9 @@
 .export load_title_screen_background
 .proc load_title_screen_background
 	; set nametable address in PPU
+	; read PPUSTATUS to clear address latch
 	LDA PPUSTATUS
+	
 	LDA #$20
 	STA PPUADDR
 	LDA #$00

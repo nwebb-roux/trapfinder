@@ -11,6 +11,10 @@ ca65 src/core/irq.asm
 ca65 src/core/controller.asm
 ca65 src/core/rng.asm
 
+# Audio
+ca65 src/audio/famistudio_ca65.s
+ca65 src/audio/audio.asm
+
 # Title Screen
 ca65 src/title_screen/main.asm
 ca65 src/title_screen/load_palettes.asm
@@ -29,6 +33,6 @@ ca65 src/dungeon/map_collision.asm
 ca65 src/dungeon/load_treasure.asm
 ca65 src/dungeon/draw_treasure.asm
 
-ld65 src/title_screen/*.o src/dungeon/*.o src/core/*.o src/*.o -C nes.cfg -o Trapfinder.nes
+ld65 src/audio/*.o src/title_screen/*.o src/dungeon/*.o src/core/*.o src/*.o -C nes.cfg -o Trapfinder.nes
 
-rm -f src/*.o src/title_screen/*.o src/dungeon/*.o src/core/*.o src/macros/*.o
+rm -f src/audio/*.o src/*.o src/title_screen/*.o src/dungeon/*.o src/core/*.o src/macros/*.o

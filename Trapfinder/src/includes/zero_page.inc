@@ -61,5 +61,8 @@ treasure_flags: .res 5
 treasure_x_coords: .res 5
 treasure_y_coords: .res 5
 
-.exportzp timer, seed0, seed1, buttons, new_buttons, avatar_x, avatar_y, avatar_tile_location, avatar_sprite_attributes, player_sprite_frame, player_sprite_facing, player_sprite_movement, screen_state, collision_metatile_offset_1, collision_metatile_offset_2, indirect_address, treasure_flags, treasure_x_coords, treasure_y_coords
+; bytes for famistudio
+famistudio_bytes: .res 8
+
+.exportzp timer, seed0, seed1, buttons, new_buttons, avatar_x, avatar_y, avatar_tile_location, avatar_sprite_attributes, player_sprite_frame, player_sprite_facing, player_sprite_movement, screen_state, collision_metatile_offset_1, collision_metatile_offset_2, indirect_address, treasure_flags, treasure_x_coords, treasure_y_coords, famistudio_bytes
 .endproc

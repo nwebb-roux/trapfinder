@@ -1,8 +1,10 @@
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp buttons, avatar_x, avatar_y, collision_metatile_offset_1, collision_metatile_offset_2
+
+.segment "BSS"
+.import COLLISION_TABLE, SCREEN_MAP
 
 .segment "CODE"
 .export dungeon_handle_background_collision

@@ -1,9 +1,11 @@
 .include "maps.inc"
 .include "../includes/constants.inc"
-.include "../includes/ram_constants.inc"
 
 .segment "ZEROPAGE"
 .importzp indirect_address
+
+.segment "BSS"
+.import DUNGEON_FLOOR, DUNGEON_FLOOR_OFFSET, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, COUNTER, COUNTER_X, SCREEN_MAP_LOCATION, COLLISION_TABLE, SCREEN_MAP_END
 
 .segment "CODE"
 .export load_dungeon_map

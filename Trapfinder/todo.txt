@@ -2,8 +2,7 @@ DEBUG TODO
 
 LAST ROUND
 - Make open tiles in underworld level more scattered, rather than multiples of a type in a row
-- Chests being put on block tiles! Seems to happen often in underworld and sometimes in palace?
-- Change marble stairs palette
+- Change marble stairs palette (is this done?)
 
 INTERACTION
 - Change what counts as colliding with a chest to be able to open it?
