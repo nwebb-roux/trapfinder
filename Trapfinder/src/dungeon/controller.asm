@@ -4,7 +4,7 @@
 .importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing, treasure_flags, treasure_x_coords, treasure_y_coords
 
 .segment "BSS"
-.import DUNGEON_FLOOR
+.import DUNGEON_FLOOR, COUNTER
 
 .segment "CODE"
 .export dungeon_handle_controller
@@ -128,6 +128,15 @@ TreasureLoop:
 	BCC @noCollide
 
 	; collision occurred
+	; store counter temporarily because SFX messes with X (and A)
+	STX COUNTER
+
+	; trigger sfx
+	JSR sfx_chest_open
+
+	; reload counter
+	LDX COUNTER
+
 	; load treasure flags into A
 	LDA treasure_flags, X
 
@@ -248,3 +257,4 @@ CheckComplete:
 .import load_title_screen
 .import load_dungeon_screen
 .import dungeon_logic
+.import sfx_chest_open

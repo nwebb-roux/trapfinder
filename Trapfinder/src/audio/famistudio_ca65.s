@@ -143,8 +143,8 @@
 FAMISTUDIO_CFG_NTSC_SUPPORT  = 1
 
 ; Support for sound effects playback + number of SFX that can play at once.
-; FAMISTUDIO_CFG_SFX_SUPPORT   = 1 
-; FAMISTUDIO_CFG_SFX_STREAMS   = 2
+FAMISTUDIO_CFG_SFX_SUPPORT   = 1 
+FAMISTUDIO_CFG_SFX_STREAMS   = 2
 
 ; Blaarg's smooth vibrato technique. Eliminates phase resets ("pops") on square channels. 
 ; FAMISTUDIO_CFG_SMOOTH_VIBRATO = 1 
@@ -234,10 +234,10 @@ FAMISTUDIO_USE_VOLUME_TRACK      = 1 ; must be on
 ; FAMISTUDIO_USE_INSTRUMENT_EXTENDED_RANGE = 1
 
 ; Must be enabled if your project uses the "Phase Reset" effect.
-;; FAMISTUDIO_USE_PHASE_RESET = 1
+; FAMISTUDIO_USE_PHASE_RESET = 1
 
 ; Must be enabled if your project uses the FDS expansion and at least one instrument with FDS Auto-Mod enabled.
-;; FAMISTUDIO_USE_FDS_AUTOMOD  = 1
+; FAMISTUDIO_USE_FDS_AUTOMOD  = 1
 
 .endif
 
