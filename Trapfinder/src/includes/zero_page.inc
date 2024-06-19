@@ -54,6 +54,7 @@ screen_state: .res 1
 ; place to store addresses we want to indirect index to
 ; store low byte, high byte
 indirect_address: .res 2
+indirect_address_2: .res 2
 
 ; object pool for treasure on screen--up to five treasures
 ; treasure flags byte, from left to right (bits 0 to 7): closed (1 bit), has trap (1 bit), trap type (2 bits), treasure type (4 bits)
@@ -64,5 +65,5 @@ treasure_y_coords: .res 5
 ; bytes for famistudio
 famistudio_bytes: .res 8
 
-.exportzp timer, seed0, seed1, buttons, new_buttons, avatar_x, avatar_y, avatar_tile_location, avatar_sprite_attributes, player_sprite_frame, player_sprite_facing, player_sprite_movement, screen_state, collision_metatile_offset_1, collision_metatile_offset_2, indirect_address, treasure_flags, treasure_x_coords, treasure_y_coords, famistudio_bytes
+.exportzp timer, seed0, seed1, buttons, new_buttons, avatar_x, avatar_y, avatar_tile_location, avatar_sprite_attributes, player_sprite_frame, player_sprite_facing, player_sprite_movement, screen_state, collision_metatile_offset_1, collision_metatile_offset_2, indirect_address, indirect_address_2, treasure_flags, treasure_x_coords, treasure_y_coords, famistudio_bytes
 .endproc
