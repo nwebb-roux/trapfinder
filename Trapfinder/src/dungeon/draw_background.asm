@@ -8,9 +8,14 @@
 .export draw_dungeon_background
 .proc draw_dungeon_background
 	; set nametable address in PPU
+	; first, read PPUSTATUS to clear the PPU's address latch so we know we're doing a clean write
 	LDA PPUSTATUS
+
+	; then write high byte of the target address
 	LDA #$20
 	STA PPUADDR
+
+	; then low byte
 	LDA #$00
 	STA PPUADDR
 

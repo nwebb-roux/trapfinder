@@ -33,6 +33,11 @@ ca65 src/dungeon/map_collision.asm
 ca65 src/dungeon/load_treasure.asm
 ca65 src/dungeon/draw_treasure.asm
 
-ld65 src/audio/*.o src/title_screen/*.o src/dungeon/*.o src/core/*.o src/*.o -C nes.cfg -o Trapfinder.nes
+# Dialogue
+ca65 src/dialogue/main.asm
+ca65 src/dialogue/load_palettes.asm
+ca65 src/dialogue/render_dialogue.asm
 
-rm -f src/audio/*.o src/*.o src/title_screen/*.o src/dungeon/*.o src/core/*.o src/macros/*.o
+ld65 src/audio/*.o src/title_screen/*.o src/dungeon/*.o src/dialogue/*.o src/core/*.o src/*.o -C nes.cfg -o Trapfinder.nes
+
+rm -f src/audio/*.o src/*.o src/title_screen/*.o src/dungeon/*.o src/dialogue/*.o src/core/*.o src/macros/*.o

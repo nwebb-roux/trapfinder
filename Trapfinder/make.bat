@@ -33,6 +33,11 @@ ca65 src\dungeon\map_collision.asm
 ca65 src\dungeon\load_treasure.asm
 ca65 src\dungeon\draw_treasure.asm
 
+:: Dialogue
+ca65 src\dialogue\main.asm
+ca65 src\dialogue\load_palettes.asm
+ca65 src\dialogue\render_dialogue.asm
+
 set "FILES="
 
 for /R %%f in (*.o) do (
@@ -40,4 +45,4 @@ for /R %%f in (*.o) do (
 )
 ld65 %FILES% -C nes.cfg -o Trapfinder.nes
 
-del src\*.o src\title_screen\*.o src\dungeon\*.o src\core\*.o src\macros\*.o
+del src\*.o src\title_screen\*.o src\dungeon\*.o src\dialogue\*.o src\core\*.o src\macros\*.o

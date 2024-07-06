@@ -8,7 +8,7 @@
 	LDX #%00
 	STX PPUMASK
 
-	SetDialogueScreenState
+	SetDialogueState
 
 	; TODO make this a macro or subroutine
 	; move all sprites offscreen
@@ -20,19 +20,20 @@
 	BNE @sprite_reset_loop
 
 	JSR bankswitch
-	JSR load_title_screen_palettes
-	JSR load_title_screen_background
+	JSR load_dialogue_palettes
+	JSR init_background
 
 	; turn PPU back on
 	LDA PPUMASK_STANDARD
 	STA PPUMASK
 
+	JSR render_dialogue
+
 	RTS
 .endproc
 
-.export title_screen_logic
-.proc title_screen_logic
-	JSR title_screen_handle_controller
+.export dialogue_screen_logic
+.proc dialogue_screen_logic
 
 	RTS
 .endproc
@@ -49,6 +50,6 @@ bankswitch:
 bankvalues:
 	.byte $00, $01, $02, $03
 
-.import load_title_screen_palettes
-.import load_title_screen_background
-.import title_screen_handle_controller
+.import init_background
+.import render_dialogue
+.import load_dialogue_palettes

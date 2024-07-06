@@ -17,7 +17,8 @@
 .proc main
 	; do any first-time init
 	JSR audio_init
-	JSR load_title_screen
+	;JSR load_title_screen
+	JSR load_dialogue_screen
 game_loop:
 	JSR read_controller
 
@@ -30,7 +31,10 @@ check_title_screen:
 	JSR title_screen_logic		; if we didn't jump ahead, run title screen logic
 	JSR run_loop				; once title screen logic is done, jump to the wait loop
 check_dialogue:
-	JSR check_dungeon			; change this when implementing actual check
+	CMP #DIALOGUE_STATE
+	BNE check_dungeon
+	JSR dialogue_screen_logic
+	JSR run_loop
 check_dungeon:
 	CMP #DUNGEON_STATE		; compare A to the flag value for dungeon
 	BNE run_loop				; CHANGE THIS WHEN WE HAVE MORE SCREENS
@@ -53,13 +57,18 @@ run_loop:
 .import read_controller
 .import title_screen_logic
 .import dungeon_logic
+.import dialogue_screen_logic
+.import load_dialogue_screen
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
 
-; load CHR banks - 0: title screen/dialogue/inventory, 1: dungeon, 2: town/dungeon, 3: battle
+; load CHR banks - 0: title screen, 1: dungeon, 2: dialogue, 3: ?
 .segment "CHR0"
 .incbin "src/graphics/tf_title_screen.chr"
 
 .segment "CHR1"
 .incbin "src/graphics/tf_dungeons.chr"
+
+.segment "CHR2"
+.incbin "src/graphics/tf_dialogue.chr"
