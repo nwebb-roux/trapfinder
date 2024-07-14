@@ -3,9 +3,6 @@
 .segment "ZEROPAGE"
 .importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing, treasure_flags, treasure_x_coords, treasure_y_coords
 
-.segment "BSS"
-.import DUNGEON_FLOOR, COUNTER
-
 .segment "CODE"
 .export dialogue_handle_controller
 .proc dialogue_handle_controller

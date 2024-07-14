@@ -1,6 +1,9 @@
 .include "../includes/constants.inc"
 .include "../macros/state.asm"
 
+.segment "BSS"
+.import SCRATCH_D
+
 .segment "CODE"
 .export load_dialogue_screen
 .proc load_dialogue_screen
@@ -22,7 +25,7 @@
 	JSR bankswitch
 	JSR load_dialogue_palettes
 	JSR init_background
-	JSR render_dialogue
+	JSR prep_dialogue_screen
 
 	; turn PPU back on
 	LDA PPUMASK_STANDARD
@@ -35,6 +38,15 @@
 .proc dialogue_screen_logic
 	JSR dialogue_handle_controller
 
+	; if "finished writing text" flag (in SCRATCH_D) is set, jump directly to end
+	LDX SCRATCH_D
+	CPX #$01
+	BEQ end_dialogue_logic
+
+	; flag wasn't set; draw next character
+	JSR draw_next_character
+
+end_dialogue_logic:
 	RTS
 .endproc
 
@@ -51,6 +63,8 @@ bankvalues:
 	.byte $00, $01, $02, $03
 
 .import init_background
+.import prep_dialogue_screen
 .import render_dialogue
 .import load_dialogue_palettes
 .import dialogue_handle_controller
+.import draw_next_character

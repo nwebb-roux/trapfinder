@@ -6,7 +6,7 @@
 .importzp indirect_address
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C
+.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME
 
 .segment "CODE"
 .export init_background
@@ -113,8 +113,12 @@ do_newline:
 	RTS
 .endproc
 
-.export render_dialogue
-.proc render_dialogue
+.export prep_dialogue_screen
+.proc prep_dialogue_screen
+	; set "done writing dialogue" flag to 1 (true) - it's stored in SCRATCH_D
+	LDY #$01
+	STY SCRATCH_D
+
 	; set which quarter of the screen the dialogue is in (top 20, upper mid 21, lower mid 22, bottom 23)
 	LDA #$21
 	STA SCRATCH_C
@@ -147,10 +151,29 @@ do_newline:
 	LDA dialogue_locations, X
 	STA indirect_address
 
-	; set Y for loop
+	; set "done writing dialogue" flag to 0 (false)
 	LDY #$00
+	STY SCRATCH_D
 
-write_words_loop:
+	; set writing animation frame to 0 - used to time displaying each character of text
+	STY ANIMATION_FRAME
+
+	; set symbol location to 0 - stored in COUNTER
+	STY COUNTER
+
+	RTS
+.endproc
+
+.export draw_next_character
+.proc draw_next_character
+	; if ANIMATION_FRAME is not 0, don't draw the next symbol
+	LDX ANIMATION_FRAME
+	CPX #$00
+	BNE increment_animation_frame
+
+	; time to draw a symbol, so get the symbol location counter
+	LDY COUNTER
+
 	; with the magic of postindexing, we load the next encoded symbol of dialogue into A
 	; (i.e. we get it from the location stored in indirect_address, plus Y)
 	LDA (indirect_address),Y
@@ -162,14 +185,13 @@ write_words_loop:
 
 	; if A holds the end symbol ($7F, aka 127), we're done
 	CMP #$7F
-	BEQ done_rendering
+	BEQ end_of_text
 
 	; if not, draw whatever's in A
 	JSR draw_letter
 
-	; increment Y and loop
-	INY
-	JMP write_words_loop
+	; increment location counter and animation frame and end this pass through the subroutine
+	JMP increment_location_counter
 
 decode_digram:
 	; shift the digram code left - this doubles the lower seven bits while dropping the leftmost
@@ -191,10 +213,32 @@ decode_digram:
 
 	JSR draw_letter
 
-	; increment Y and loop
-	INY
-	JMP write_words_loop
+	; load animation frame back into X so it can be incremented below
+	LDX ANIMATION_FRAME
 
-done_rendering:
+	; increment location counter and animation frame and end this pass through the subroutine
+	JMP increment_location_counter
+
+end_of_text:
+	; set "done writing dialogue" flag to 1 (true) - it's stored in SCRATCH_D - and end
+	LDY #$01
+	STY SCRATCH_D
+	RTS
+
+increment_location_counter:
+	; note: Y MUST hold COUNTER's current value at this point!
+	INY
+	STY COUNTER
+
+increment_animation_frame:
+	; note: X MUST hold ANIMATION_FRAME's current value at this point!
+	INX
+	; if X is less than 16, go to end
+	CPX #$10
+	BNE done_with_frame
+	; if X was 16, reset to 0 (so animation frame loops through 0 to 15)
+	LDX #$00
+done_with_frame:
+	STX ANIMATION_FRAME
 	RTS
 .endproc
