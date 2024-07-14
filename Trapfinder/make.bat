@@ -37,6 +37,7 @@ ca65 src\dungeon\draw_treasure.asm
 ca65 src\dialogue\main.asm
 ca65 src\dialogue\load_palettes.asm
 ca65 src\dialogue\render_dialogue.asm
+ca65 src\dialogue\controller.asm
 
 set "FILES="
 

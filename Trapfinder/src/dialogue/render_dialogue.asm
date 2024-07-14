@@ -6,7 +6,7 @@
 .importzp indirect_address
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER
+.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C
 
 .segment "CODE"
 .export init_background
@@ -70,17 +70,71 @@ attribute_loop:
 	RTS
 .endproc
 
+.proc draw_letter
+	; letter must be in A when we jump here
+
+	; if A holds the newline symbol ($5E) go to a newline
+	CMP #$5E
+	BEQ do_newline
+
+	; if not, draw a single letter and return
+	STA PPUDATA
+
+	RTS
+
+do_newline:
+	; reset PPU address latch
+	LDA PPUSTATUS
+
+	; set PPU address high byte
+	LDA SCRATCH_C
+	STA PPUADDR
+
+	; get current line number
+	LDA SCRATCH_B
+
+	; increment it
+	CLC
+	ADC #$01
+
+	; store new value
+	STA SCRATCH_B
+
+	; multiply it by 32
+	ASL
+	ASL
+	ASL
+	ASL
+	ASL
+
+	; set PPU address low byte
+	STA PPUADDR
+
+	RTS
+.endproc
+
 .export render_dialogue
 .proc render_dialogue
+	; set which quarter of the screen the dialogue is in (top 20, upper mid 21, lower mid 22, bottom 23)
+	LDA #$21
+	STA SCRATCH_C
+
+	; set starting line of dialogue - this number gets multiplied by 32 to become low byte of PPUADDR
+	LDA #$00
+	STA SCRATCH_B
+
 	; set nametable address in PPU
 	LDA PPUSTATUS
 
-	LDA #$20
+	LDA SCRATCH_C
 	STA PPUADDR
-	LDA #$00
+	LDA SCRATCH_B
 	STA PPUADDR
 
-	LDX DUNGEON_FLOOR
+	; load dungeon floor and double it to make it an index into the dialogue_locations lookup table
+	LDA DUNGEON_FLOOR
+	ASL
+	TAX
 
 	; load high byte of this floor's dialogue location and store in ZP var
 	; (it's stored reversed in dialogue_locations table, i.e. high-low instead of the usual low-high,
@@ -93,12 +147,12 @@ attribute_loop:
 	LDA dialogue_locations, X
 	STA indirect_address
 
-	; set Y for loop, X will be our junk var
+	; set Y for loop
 	LDY #$00
 
 write_words_loop:
 	; with the magic of postindexing, we load the next encoded symbol of dialogue into A
-	; (i.e. we get it from the location stored in indirect_address, plus X)
+	; (i.e. we get it from the location stored in indirect_address, plus Y)
 	LDA (indirect_address),Y
 
 	; if bit 7 of the encoded symbol is 1, it's an encoded digram
@@ -110,8 +164,8 @@ write_words_loop:
 	CMP #$7F
 	BEQ done_rendering
 
-	; if not, draw a single letter
-	STA PPUDATA
+	; if not, draw whatever's in A
+	JSR draw_letter
 
 	; increment Y and loop
 	INY
@@ -127,12 +181,15 @@ decode_digram:
 
 	; use it as an offset to the digram table to get the first character
 	LDA digrams,X
-	STA PPUDATA
+
+	; draw the character
+	JSR draw_letter
 
 	; and the second
 	INX
 	LDA digrams,X
-	STA PPUDATA
+
+	JSR draw_letter
 
 	; increment Y and loop
 	INY

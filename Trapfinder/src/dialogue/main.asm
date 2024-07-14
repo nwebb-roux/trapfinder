@@ -22,18 +22,18 @@
 	JSR bankswitch
 	JSR load_dialogue_palettes
 	JSR init_background
+	JSR render_dialogue
 
 	; turn PPU back on
 	LDA PPUMASK_STANDARD
 	STA PPUMASK
-
-	JSR render_dialogue
 
 	RTS
 .endproc
 
 .export dialogue_screen_logic
 .proc dialogue_screen_logic
+	JSR dialogue_handle_controller
 
 	RTS
 .endproc
@@ -53,3 +53,4 @@ bankvalues:
 .import init_background
 .import render_dialogue
 .import load_dialogue_palettes
+.import dialogue_handle_controller

@@ -21,7 +21,6 @@ CheckA:
 	; if carry is clear, we didn't do stairs down, so move to next button check
 	BCC CheckB
 	; otherwise, we did stairs down, so we're done
-	JSR dungeon_logic
 	JMP HandleControllerDone
 CheckB:
 	LDA buttons
@@ -237,11 +236,11 @@ CheckComplete:
 	CMP avatar_y
 	BCC @noCollide
 
-	; collision occurred, increment dungeon floor and reload
+	; collision occurred, increment dungeon floor and go to dialogue state
 	LDX DUNGEON_FLOOR
 	INX
 	STX DUNGEON_FLOOR
-	JSR load_dungeon_screen
+	JSR load_dialogue_screen
 
 	; set carry flag for check on return
 	SEC
@@ -255,6 +254,6 @@ CheckComplete:
 .import dungeon_increment_avatar_sprite_frame
 .import draw_open_treasure
 .import load_title_screen
-.import load_dungeon_screen
 .import dungeon_logic
 .import sfx_chest_open
+.import load_dialogue_screen

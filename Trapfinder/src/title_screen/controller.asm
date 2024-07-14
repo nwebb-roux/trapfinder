@@ -30,7 +30,7 @@ CheckStart:
 	JSR initialize_rng
 	LDX #$00
 	STX DUNGEON_FLOOR
-	JSR load_dungeon_screen
+	JSR load_dialogue_screen
 	RTS
 CheckUp:
 	LDA new_buttons
@@ -53,7 +53,6 @@ HandleControllerDone:
 .endproc
 
 .import set_player_location
-;.import load_dialogue_screen
-.import load_dungeon_screen
+.import load_dialogue_screen
 .import increment_jewel_palette
 .import initialize_rng

@@ -17,8 +17,7 @@
 .proc main
 	; do any first-time init
 	JSR audio_init
-	;JSR load_title_screen
-	JSR load_dialogue_screen
+	JSR load_title_screen
 game_loop:
 	JSR read_controller
 
@@ -58,7 +57,6 @@ run_loop:
 .import title_screen_logic
 .import dungeon_logic
 .import dialogue_screen_logic
-.import load_dialogue_screen
 
 .segment "VECTORS"
 .addr nmi_handler, reset_handler, irq_handler
