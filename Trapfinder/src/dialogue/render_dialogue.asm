@@ -6,7 +6,7 @@
 .importzp indirect_address
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME
+.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION
 
 .segment "CODE"
 .export init_background
@@ -70,49 +70,6 @@ attribute_loop:
 	RTS
 .endproc
 
-.proc draw_letter
-	; letter must be in A when we jump here
-
-	; if A holds the newline symbol ($5E) go to a newline
-	CMP #$5E
-	BEQ do_newline
-
-	; if not, draw a single letter and return
-	STA PPUDATA
-
-	RTS
-
-do_newline:
-	; reset PPU address latch
-	LDA PPUSTATUS
-
-	; set PPU address high byte
-	LDA SCRATCH_C
-	STA PPUADDR
-
-	; get current line number
-	LDA SCRATCH_B
-
-	; increment it
-	CLC
-	ADC #$01
-
-	; store new value
-	STA SCRATCH_B
-
-	; multiply it by 32
-	ASL
-	ASL
-	ASL
-	ASL
-	ASL
-
-	; set PPU address low byte
-	STA PPUADDR
-
-	RTS
-.endproc
-
 .export prep_dialogue_screen
 .proc prep_dialogue_screen
 	; set "done writing dialogue" flag to 1 (true) - it's stored in SCRATCH_D
@@ -123,16 +80,21 @@ do_newline:
 	LDA #$21
 	STA SCRATCH_C
 
-	; set starting line of dialogue - this number gets multiplied by 32 to become low byte of PPUADDR
 	LDA #$00
+
+	; set starting line number of dialogue - this number gets multiplied by 32 to become low byte of PPUADDR when we do a newline
 	STA SCRATCH_B
+
+	; store X offset of current character, holds the actual low byte of PPUADDR
+	; if we want to start on a line other than line 0 of the screen quarter, this would need to be SCRATCH_B * 32
+	STA ANIMATION_LOCATION
 
 	; set nametable address in PPU
 	LDA PPUSTATUS
 
 	LDA SCRATCH_C
 	STA PPUADDR
-	LDA SCRATCH_B
+	LDA ANIMATION_LOCATION
 	STA PPUADDR
 
 	; load dungeon floor and double it to make it an index into the dialogue_locations lookup table
@@ -164,6 +126,64 @@ do_newline:
 	RTS
 .endproc
 
+.proc draw_letter
+	; letter must be in A when we jump here
+	; will mess with Y
+
+	; if A holds the newline symbol ($5E) go to a newline
+	CMP #$5E
+	BEQ do_newline
+
+	; if not, set screen location in PPU
+	LDY PPUSTATUS
+	LDY SCRATCH_C
+	STY PPUADDR
+	LDY ANIMATION_LOCATION
+	STY PPUADDR
+
+	; increment screen location by 1 and save
+	INY
+	STY ANIMATION_LOCATION
+
+	; draw a single letter and return
+	STA PPUDATA
+
+	RTS
+
+do_newline:
+	; reset PPU address latch
+	LDA PPUSTATUS
+
+	; set PPU address high byte
+	LDA SCRATCH_C
+	STA PPUADDR
+
+	; get current line number
+	LDA SCRATCH_B
+
+	; increment it
+	CLC
+	ADC #$01
+
+	; store new value
+	STA SCRATCH_B
+
+	; multiply it by 32
+	ASL
+	ASL
+	ASL
+	ASL
+	ASL
+
+	; store that in animation location
+	STA ANIMATION_LOCATION
+
+	; set PPU address low byte
+	STA PPUADDR
+
+	RTS
+.endproc
+
 .export draw_next_character
 .proc draw_next_character
 	; if ANIMATION_FRAME is not 0, don't draw the next symbol
@@ -178,6 +198,8 @@ do_newline:
 	; (i.e. we get it from the location stored in indirect_address, plus Y)
 	LDA (indirect_address),Y
 
+	; can't increment counter and save here because it might mess with negative flag
+
 	; if bit 7 of the encoded symbol is 1, it's an encoded digram
 	; and the negative flag will have been set by the LDA above
 	; so BMI (Branch if MInus) will trigger only for encoded digrams
@@ -187,13 +209,21 @@ do_newline:
 	CMP #$7F
 	BEQ end_of_text
 
-	; if not, draw whatever's in A
+	; if not, increment counter and save
+	INY
+	STY COUNTER
+
+	; then draw whatever's in A
 	JSR draw_letter
 
-	; increment location counter and animation frame and end this pass through the subroutine
-	JMP increment_location_counter
+	; increment animation frame and end this pass through the subroutine
+	JMP increment_animation_frame
 
 decode_digram:
+	; increment counter and save
+	INY
+	STY COUNTER
+
 	; shift the digram code left - this doubles the lower seven bits while dropping the leftmost
 	; bit, resulting in an index to the digram table
 	ASL
@@ -216,8 +246,8 @@ decode_digram:
 	; load animation frame back into X so it can be incremented below
 	LDX ANIMATION_FRAME
 
-	; increment location counter and animation frame and end this pass through the subroutine
-	JMP increment_location_counter
+	; increment animation frame and end this pass through the subroutine
+	JMP increment_animation_frame
 
 end_of_text:
 	; set "done writing dialogue" flag to 1 (true) - it's stored in SCRATCH_D - and end
@@ -225,18 +255,13 @@ end_of_text:
 	STY SCRATCH_D
 	RTS
 
-increment_location_counter:
-	; note: Y MUST hold COUNTER's current value at this point!
-	INY
-	STY COUNTER
-
 increment_animation_frame:
 	; note: X MUST hold ANIMATION_FRAME's current value at this point!
 	INX
-	; if X is less than 16, go to end
-	CPX #$10
+	; if X is less than 8, go to end
+	CPX #$08
 	BNE done_with_frame
-	; if X was 16, reset to 0 (so animation frame loops through 0 to 15)
+	; if X was 8, reset to 0 (so animation frame loops through 0 to 15)
 	LDX #$00
 done_with_frame:
 	STX ANIMATION_FRAME
