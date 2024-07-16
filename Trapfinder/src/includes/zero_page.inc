@@ -47,7 +47,7 @@ player_sprite_movement: .res 1
 ;	bit 3:
 ;	bit 4:
 ;	bit 5:
-;	bit 6:
+;	bit 6: draw buffer ready to draw
 ;	bit 7: ready to render screen
 screen_state: .res 1
 

@@ -28,17 +28,17 @@ check_title_screen:
 	CMP #TITLE_SCREEN_STATE		; compare A to the flag value for title screen
 	BNE check_dialogue			; if not equal, jump to check_dungeon
 	JSR title_screen_logic		; if we didn't jump ahead, run title screen logic
-	JSR run_loop				; once title screen logic is done, jump to the wait loop
+	JMP run_loop				; once title screen logic is done, jump to the wait loop
 check_dialogue:
 	CMP #DIALOGUE_STATE
 	BNE check_dungeon
 	JSR dialogue_screen_logic
-	JSR run_loop
+	JMP run_loop
 check_dungeon:
 	CMP #DUNGEON_STATE		; compare A to the flag value for dungeon
 	BNE run_loop				; CHANGE THIS WHEN WE HAVE MORE SCREENS
 	JSR dungeon_logic
-	JSR run_loop				; not actually needed for final check block, should fall through
+	JMP run_loop				; not actually needed for final check block, should fall through
 
 run_loop:
 	; set render flag and loop forever until render flag is cleared
@@ -48,7 +48,7 @@ run_loop:
 	BMI @wait_for_nmi
 
 	; after NMI interrupt, do this whole loop again
-	JSR game_loop
+	JMP game_loop
 .endproc
 
 .import audio_init

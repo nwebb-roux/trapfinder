@@ -3,10 +3,10 @@
 .include "../includes/constants.inc"
 
 .segment "ZEROPAGE"
-.importzp indirect_address
+.importzp indirect_address, screen_state
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION
+.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION, DRAWBUFFER_OFFSET, SCRATCH_E
 
 .segment "CODE"
 .export init_background
@@ -89,14 +89,6 @@ attribute_loop:
 	; if we want to start on a line other than line 0 of the screen quarter, this would need to be SCRATCH_B * 32
 	STA ANIMATION_LOCATION
 
-	; set nametable address in PPU
-	LDA PPUSTATUS
-
-	LDA SCRATCH_C
-	STA PPUADDR
-	LDA ANIMATION_LOCATION
-	STA PPUADDR
-
 	; load dungeon floor and double it to make it an index into the dialogue_locations lookup table
 	LDA DUNGEON_FLOOR
 	ASL
@@ -128,51 +120,58 @@ attribute_loop:
 
 .proc draw_letter
 	; letter must be in A when we jump here
-	; will mess with Y
+	; will mess with X and Y
+
+	; save A to X
+	TAX
 
 	; if A holds the newline symbol ($5E) go to a newline
 	CMP #$5E
 	BEQ do_newline
 
-	;;;;;;
-	; TODO instead of this, write SCRATCH_C to $0100 + DRAWBUFFER_OFFSET,
-	; increment DRAWBUFFER_OFFSET, write ANIMATION_LOCATION to $0100 + DRAWBUFFER_OFFSET,
-	; increment DRAWBUFFER_OFFSET
+	; load buffer offset
+	LDY DRAWBUFFER_OFFSET
 
-	; if not, set screen location in PPU
-	LDY PPUSTATUS
-	LDY SCRATCH_C
-	STY PPUADDR
-	LDY ANIMATION_LOCATION
-	STY PPUADDR
-	;;;;;;
+	; TODO move length and location writes to calling function
+	; so either 1 for single letter or 2 for digram
+	; write length value (1) to draw buffer
+	LDY DRAWBUFFER_OFFSET
+	LDA #$01
+	STA $0100,Y
+
+	; increment DRAWBUFFER_OFFSET
+	INY
+
+	; write high byte of draw location to buffer
+	LDA SCRATCH_C
+	STA $0100,Y
+
+	INY
+
+	; write low byte of draw location to buffer
+	LDA ANIMATION_LOCATION
+	STA $0100,Y
+
+	INY
 
 	; increment screen location by 1 and save
+	CLC
+	ADC #$01
+	STA ANIMATION_LOCATION
+
+	; put letter back into A
+	TXA
+
+	; draw a single letter to buffer
+	STA $0100,Y
+
+	; increment offset one more time and save
 	INY
-	STY ANIMATION_LOCATION
-
-	;;;;;;
-	; TODO instead of this, STA to $0100 + DRAWBUFFER_OFFSET
-	; then increment DRAWBUFFER_OFFSET
-
-	; draw a single letter and return
-	STA PPUDATA
-	;;;;;;
+	STY DRAWBUFFER_OFFSET
 
 	RTS
 
 do_newline:
-	;;;;;;
-	; TODO remove the PPU writes, not needed - should just set the high and low bytes of
-	; PPU write address in scratch memory so next character gets that address in buffer
-
-	; reset PPU address latch
-	LDA PPUSTATUS
-
-	; set PPU address high byte
-	LDA SCRATCH_C
-	STA PPUADDR
-
 	; get current line number
 	LDA SCRATCH_B
 
@@ -192,10 +191,6 @@ do_newline:
 
 	; store that in animation location
 	STA ANIMATION_LOCATION
-
-	; set PPU address low byte
-	STA PPUADDR
-	;;;;;;
 
 	RTS
 .endproc
@@ -229,10 +224,7 @@ do_newline:
 	INY
 	STY COUNTER
 
-	; TODO write length value (#$01) to draw buffer: $0100 + DRAWBUFFER_OFFSET
-	; then increment DRAWBUFFER_OFFSET
-
-	; then draw whatever's in A
+	; draw whatever's in A
 	JSR draw_letter
 
 	; increment animation frame and end this pass through the subroutine
@@ -242,9 +234,6 @@ decode_digram:
 	; increment counter and save
 	INY
 	STY COUNTER
-
-	; TODO write length value (#$02) to draw buffer: $0100 + DRAWBUFFER_OFFSET
-	; then increment DRAWBUFFER_OFFSET
 
 	; shift the digram code left - this doubles the lower seven bits while dropping the leftmost
 	; bit, resulting in an index to the digram table
@@ -256,17 +245,20 @@ decode_digram:
 	; use it as an offset to the digram table to get the first character
 	LDA digrams,X
 
+	; stash X
+	STX SCRATCH_E
+
 	; draw the character
 	JSR draw_letter
+
+	; get X back
+	LDX SCRATCH_E
 
 	; and the second
 	INX
 	LDA digrams,X
 
 	JSR draw_letter
-
-	; load animation frame back into X so it can be incremented below
-	LDX ANIMATION_FRAME
 
 	; increment animation frame and end this pass through the subroutine
 	JMP increment_animation_frame
@@ -278,7 +270,7 @@ end_of_text:
 	RTS
 
 increment_animation_frame:
-	; note: X MUST hold ANIMATION_FRAME's current value at this point!
+	LDX ANIMATION_FRAME
 	INX
 	; if X is less than 8, go to end
 	CPX #$08
@@ -287,5 +279,20 @@ increment_animation_frame:
 	LDX #$00
 done_with_frame:
 	STX ANIMATION_FRAME
+
+	; write 0 to buffer to indicate done
+	LDX DRAWBUFFER_OFFSET
+	LDA #$00
+	STA $0100, X
+
+	; increment buffer offset
+	INX
+	STX DRAWBUFFER_OFFSET
+
+	; set buffer draw flag in screen_state
+	LDA screen_state
+	ORA #%01000000
+	STA screen_state
+
 	RTS
 .endproc

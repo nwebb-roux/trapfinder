@@ -17,8 +17,8 @@
 	INC timer
 	BNE NoSecondByteIncrement
 	INC timer+1
-	NoSecondByteIncrement:
 
+NoSecondByteIncrement:
 	; if render flag is false, skip rendering and return
 	BIT screen_state
 	BPL Return
@@ -35,7 +35,7 @@
 	STA OAMDMA		; then all we need to do is write A to the OAMDMA port and it kicks off the whole thing: the whole 256-byte page is transferred to OAM
 
 	; draw any changes to the nametables based on stack buffer
-	; JSR draw_nametable
+	JSR draw_nametable
 
 	; PPU cleanup section, don't understand this yet
 	LDA #%10010000	; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
@@ -55,6 +55,14 @@ Return:
 .endproc
 
 .proc draw_nametable
+	; check if buffer draw flag is set, if not we're done
+	; BIT sets V flag to bit 6 of whatever is referenced
+	; in this case bit 6 of screen_state is the buffer draw flag
+	BIT screen_state
+
+	; branch if V is clear (i.e. buffer draw not set)
+	BVC really_done
+
 	; save original stack pointer in memory
 	TSX
 	STX STACK_POINTER
@@ -66,11 +74,13 @@ Return:
 read_buffer_loop:
 	; get string length from stack and auto-increment SP
 	PLA
-	TAY
 
 	; if length is 0, we're done
 	CMP #$00
 	BEQ done_with_buffer
+
+	; store length in Y
+	TAY
 
 	; read PPU status to clear write latch
 	LDA PPUSTATUS
@@ -91,7 +101,7 @@ draw_bytes_loop:
 	STA PPUDATA
 
 	; decrement remaining string length
-	INX
+	DEY
 
 	; if remaining string length is 0, this string is done
 	CPY #$00
@@ -105,6 +115,10 @@ done_with_buffer:
 	LDX STACK_POINTER
 	TXS
 
+	; reset DRAWBUFFER_OFFSET
+	LDX #$00
+	STX DRAWBUFFER_OFFSET
+really_done:
 	RTS
 .endproc
 
