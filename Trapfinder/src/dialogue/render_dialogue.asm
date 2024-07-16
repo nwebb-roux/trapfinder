@@ -134,23 +134,38 @@ attribute_loop:
 	CMP #$5E
 	BEQ do_newline
 
+	;;;;;;
+	; TODO instead of this, write SCRATCH_C to $0100 + DRAWBUFFER_OFFSET,
+	; increment DRAWBUFFER_OFFSET, write ANIMATION_LOCATION to $0100 + DRAWBUFFER_OFFSET,
+	; increment DRAWBUFFER_OFFSET
+
 	; if not, set screen location in PPU
 	LDY PPUSTATUS
 	LDY SCRATCH_C
 	STY PPUADDR
 	LDY ANIMATION_LOCATION
 	STY PPUADDR
+	;;;;;;
 
 	; increment screen location by 1 and save
 	INY
 	STY ANIMATION_LOCATION
 
+	;;;;;;
+	; TODO instead of this, STA to $0100 + DRAWBUFFER_OFFSET
+	; then increment DRAWBUFFER_OFFSET
+
 	; draw a single letter and return
 	STA PPUDATA
+	;;;;;;
 
 	RTS
 
 do_newline:
+	;;;;;;
+	; TODO remove the PPU writes, not needed - should just set the high and low bytes of
+	; PPU write address in scratch memory so next character gets that address in buffer
+
 	; reset PPU address latch
 	LDA PPUSTATUS
 
@@ -180,6 +195,7 @@ do_newline:
 
 	; set PPU address low byte
 	STA PPUADDR
+	;;;;;;
 
 	RTS
 .endproc
@@ -213,6 +229,9 @@ do_newline:
 	INY
 	STY COUNTER
 
+	; TODO write length value (#$01) to draw buffer: $0100 + DRAWBUFFER_OFFSET
+	; then increment DRAWBUFFER_OFFSET
+
 	; then draw whatever's in A
 	JSR draw_letter
 
@@ -223,6 +242,9 @@ decode_digram:
 	; increment counter and save
 	INY
 	STY COUNTER
+
+	; TODO write length value (#$02) to draw buffer: $0100 + DRAWBUFFER_OFFSET
+	; then increment DRAWBUFFER_OFFSET
 
 	; shift the digram code left - this doubles the lower seven bits while dropping the leftmost
 	; bit, resulting in an index to the digram table

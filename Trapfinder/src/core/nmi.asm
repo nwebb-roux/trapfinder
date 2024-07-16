@@ -4,6 +4,12 @@
 .segment "ZEROPAGE"
 .importzp screen_state, timer
 
+.segment "DRAWBUFFER"
+.import DRAWBUFFER
+
+.segment "BSS"
+.import DRAWBUFFER_OFFSET, STACK_POINTER
+
 .segment "CODE"
 .export nmi_handler
 .proc nmi_handler
@@ -28,6 +34,9 @@
 	LDA #$02		; we load the high byte of the page, $02, into A
 	STA OAMDMA		; then all we need to do is write A to the OAMDMA port and it kicks off the whole thing: the whole 256-byte page is transferred to OAM
 
+	; draw any changes to the nametables based on stack buffer
+	; JSR draw_nametable
+
 	; PPU cleanup section, don't understand this yet
 	LDA #%10010000	; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 	STA PPUCTRL
@@ -43,6 +52,60 @@
 	JSR famistudio_update
 Return:
 	RTI				; return from the NMI interrupt
+.endproc
+
+.proc draw_nametable
+	; save original stack pointer in memory
+	TSX
+	STX STACK_POINTER
+
+	; set stack pointer to $01FF - will get first byte at $0100, I hope
+	LDX #$FF
+	TXS
+
+read_buffer_loop:
+	; get string length from stack and auto-increment SP
+	PLA
+	TAY
+
+	; if length is 0, we're done
+	CMP #$00
+	BEQ done_with_buffer
+
+	; read PPU status to clear write latch
+	LDA PPUSTATUS
+
+	; get and write high byte of PPU address
+	PLA
+	STA PPUADDR
+
+	; get and write low byte of PPU address
+	PLA
+	STA PPUADDR
+
+draw_bytes_loop:
+	; get data byte
+	PLA
+
+	; write to PPU
+	STA PPUDATA
+
+	; decrement remaining string length
+	INX
+
+	; if remaining string length is 0, this string is done
+	CPY #$00
+	BEQ read_buffer_loop
+
+	; if not, keep drawing
+	JMP draw_bytes_loop
+
+done_with_buffer:
+	; reset original stack pointer
+	LDX STACK_POINTER
+	TXS
+
+	RTS
 .endproc
 
 .import famistudio_update
