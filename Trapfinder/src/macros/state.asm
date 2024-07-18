@@ -8,6 +8,13 @@
 	STA screen_state
 .endmacro
 
+.macro SetDialogueState
+	LDA screen_state
+	AND #%11111000			; set last 3 bits to 000 without changing first 5 bits
+	ORA #DIALOGUE_STATE	; now set last 3 bits to 001 without changing first 5 bits
+	STA screen_state
+.endmacro
+
 .macro SetDungeonState
 	LDA screen_state
 	AND #%11111000			; set last 3 bits to 000 without changing first 5 bits

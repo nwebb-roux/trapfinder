@@ -1,8 +1,16 @@
+.segment "DRAWBUFFER"
+; **** CUSTOM MEMORY MAP FOR THE NAMETABLE DRAWING BUFFER ($0100-$019F) ****
+; NOTE: uses a big portion of the stack page
+DRAWBUFFER: .res 160
+
 .segment "BSS"
 ; **** CUSTOM MEMORY MAP FOR THE FREE RAM ($0300-$07FF) ****
 
-; helper for when we need more than X and Y to loop
+; helpers for when we need more than X and Y to loop
 COUNTER: .res 1
+SCRATCH_B: .res 1
+SCRATCH_C: .res 1
+SCRATCH_D: .res 1
 
 ; stores which floor group of the dungeon (cavern, dungeon, marble, etc.) the player is on
 DUNGEON_FLOOR: .res 1
@@ -15,13 +23,6 @@ SCREEN_MAP_ATTRIBUTES: .res 64
 SCREEN_MAP_ATTRIBUTES_END: .res 1
 ATTRIBUTE_MASK: .res 1
 
-; another counter helper
-COUNTER_X: .res 1
-
-; background palette 1, used for animations
-BG_PAL_1: .res 4
-BG_PAL_FLAG: .res 1
-
 ; dungeon map currently on the screen, 13 metatiles high and 16 metatiles wide
 SCREEN_MAP: .res 240 ; holds the terrain type/state data
 SCREEN_MAP_END: .res 1
@@ -31,5 +32,19 @@ SCREEN_MAP_LOCATION: .res 1
 ; holds the collision lookup table, 0-15
 COLLISION_TABLE: .res 16
 
-.export COUNTER, DUNGEON_FLOOR, DUNGEON_FLOOR_OFFSET, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, COUNTER_X, BG_PAL_1, BG_PAL_FLAG, SCREEN_MAP,SCREEN_MAP_END,SCREEN_MAP_SECOND_PASS,SCREEN_MAP_LOCATION, COLLISION_TABLE
-; .endproc
+; bg decompression variables
+CURRENT_DECODE_VALUE: .res 1
+CURRENT_DECODE_LENGTH: .res 1
+METATILES_DECODED: .res 1
+CURRENT_DECODE_BYTE: .res 1
+
+; animation helpers - not all used
+ANIMATION_FRAME: .res 1
+ANIMATION_LOCATION: .res 1
+DRAWBUFFER_OFFSET: .res 1
+
+; more helpers
+STACK_POINTER: .res 1
+SCRATCH_E: .res 1
+
+.export COUNTER, DUNGEON_FLOOR, DUNGEON_FLOOR_OFFSET, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, SCRATCH_B, SCREEN_MAP,SCREEN_MAP_END,SCREEN_MAP_SECOND_PASS,SCREEN_MAP_LOCATION, COLLISION_TABLE, CURRENT_DECODE_VALUE, CURRENT_DECODE_LENGTH, METATILES_DECODED, CURRENT_DECODE_BYTE, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION, DRAWBUFFER_OFFSET, DRAWBUFFER, STACK_POINTER, SCRATCH_E

@@ -4,7 +4,7 @@
 .importzp treasure_flags, treasure_x_coords, treasure_y_coords
 
 .segment "BSS"
-.import COLLISION_TABLE, SCREEN_MAP, COUNTER, COUNTER_X
+.import COLLISION_TABLE, SCREEN_MAP, COUNTER, SCRATCH_B
 
 .segment "CODE"
 .export clear_treasure
@@ -25,10 +25,10 @@ ClearTreasureLoop:
 
 .export populate_treasure
 .proc populate_treasure
-	; begin loop counters: X is position in screen map, Y is position in treasure pool, COUNTER_X is position in row (0-15)
+	; begin loop counters: X is position in screen map, Y is position in treasure pool, SCRATCH_B is position in row (0-15)
 	LDX #$20
 	LDY #$00
-	STY COUNTER_X
+	STY SCRATCH_B
 
 	; TODO: CLEAR TREASURE POOL?
 
@@ -42,7 +42,7 @@ TreasureLoop:
 	BEQ TreasureDone
 
 	; load position in current row
-	LDA COUNTER_X
+	LDA SCRATCH_B
 
 	; if we're at metatile 0 or 15 in the row, don't generate treasure for this metatile
 	CMP #$00
@@ -140,16 +140,16 @@ NextLoop:
 	INX
 
 	; increment position in current row
-	LDA COUNTER_X
+	LDA SCRATCH_B
 	CLC
 	ADC #$01
-	STA COUNTER_X
+	STA SCRATCH_B
 
 	; if row position is 16, reset it to 0
 	CMP #$10
 	BNE NoResetRow
 	LDA #$00
-	STA COUNTER_X
+	STA SCRATCH_B
 
 NoResetRow:
 	; go to start of loop
