@@ -2,7 +2,7 @@
 .importzp FAMISTUDIO_SFX_CH0
 
 .segment "BSS"
-.import DUNGEON_FLOOR
+.import DUNGEON_ZONE
 
 .segment "CODE"
 .export audio_init
@@ -38,7 +38,7 @@
 .export audio_dungeon
 .proc audio_dungeon
 	JSR famistudio_music_stop
-	LDX DUNGEON_FLOOR
+	LDX DUNGEON_ZONE
 	LDA dungeon_tracks, X
     JSR famistudio_music_play
 	RTS

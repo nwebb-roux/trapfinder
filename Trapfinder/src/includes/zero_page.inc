@@ -57,7 +57,7 @@ indirect_address: .res 2
 indirect_address_2: .res 2
 
 ; object pool for treasure on screen--up to five treasures
-; treasure flags byte, from left to right (bits 0 to 7): closed (1 bit), has trap (1 bit), trap type (2 bits), treasure type (4 bits)
+; treasure flags byte, from left to right (bits 7 to 0): closed (1 bit), has trap (1 bit), trap type (2 bits), treasure type (4 bits)
 treasure_flags: .res 5
 treasure_x_coords: .res 5
 treasure_y_coords: .res 5

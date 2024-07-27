@@ -37,8 +37,8 @@ TreasureLoop:
 	CPY #$05
 	BEQ TreasureDone
 
-	; if position in screen map is 208 (first metatile of bottom rows) we're done
-	CPX #$D0
+	; if position in screen map is 176 (first metatile of bottom rows) we're done
+	CPX #$B0
 	BEQ TreasureDone
 
 	; load position in current row
@@ -111,6 +111,9 @@ TreasureLoop:
 	; subtract 1
 	SEC
 	SBC #$01
+
+	CLC
+	ADC #$20
 
 	; save to treasure_y_coords
 	STA treasure_y_coords, Y

@@ -3,7 +3,7 @@
 .include "../includes/constants.inc"
 
 .segment "BSS"
-.import DUNGEON_FLOOR
+.import DUNGEON_ZONE
 
 .segment "CODE"
 .export load_dungeon_palettes
@@ -14,7 +14,7 @@
 	LDA #$00
 	STA PPUADDR
 
-	LDY DUNGEON_FLOOR
+	LDY DUNGEON_ZONE
 	LDX floor_offsets, Y
 LoadBGPaletteLoop:
 	LDA dungeon_palettes, X

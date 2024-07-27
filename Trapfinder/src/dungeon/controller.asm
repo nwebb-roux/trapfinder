@@ -1,10 +1,10 @@
 .include "../includes/constants.inc"
 
 .segment "ZEROPAGE"
-.importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing, treasure_flags, treasure_x_coords, treasure_y_coords
+.importzp buttons, new_buttons, avatar_x, avatar_y, player_sprite_facing
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER
+.import DUNGEON_LEVEL_ONES, DUNGEON_LEVEL_TENS, DUNGEON_ZONE, COUNTER
 
 .segment "CODE"
 .export dungeon_handle_controller
@@ -100,78 +100,6 @@ HandleControllerDone:
 	RTS
 .endproc
 
-.proc check_treasure_collisions
-	; init loop var
-	LDX #$00
-
-TreasureLoop:
-	LDA avatar_x
-	CLC
-	ADC #$10
-	CMP treasure_x_coords, X
-	BCC @noCollide
-	LDA treasure_x_coords, X
-	CLC
-	ADC #$10
-	CMP avatar_x
-	BCC @noCollide
-	LDA avatar_y
-	CLC
-	ADC #$10
-	CMP treasure_y_coords, X
-	BCC @noCollide
-	LDA treasure_y_coords, X
-	CLC
-	ADC #$10
-	CMP avatar_y
-	BCC @noCollide
-
-	; collision occurred
-	; store counter temporarily because SFX messes with X (and A)
-	STX COUNTER
-
-	; trigger sfx
-	JSR sfx_chest_open
-
-	; reload counter
-	LDX COUNTER
-
-	; load treasure flags into A
-	LDA treasure_flags, X
-
-	; mask out all but "is it closed" bit
-	AND #%10000000
-
-	; if already open, we're done
-	CMP #$00
-	BEQ @noCollide
-
-	; treasure is closed, continue with collision
-	; reload treasure flags
-	LDA treasure_flags, X
-
-	; set "is it closed" bit to 0 and store
-	AND #%01111111
-	STA treasure_flags, X
-
-	; redraw the chest sprite as open
-	JSR draw_open_treasure
-
-@noCollide:
-	; increment loop counter
-	INX
-
-	; if X is 5, we're done
-	CPX #$05
-	BEQ CheckComplete
-
-	; otherwise, loop again
-	JMP TreasureLoop
-
-CheckComplete:
-	RTS
-.endproc
-
 .proc check_stairs_up_collision
 	LDA avatar_x
 	CLC
@@ -228,7 +156,6 @@ CheckComplete:
 	CMP #STAIRS_DOWN_Y
 	BCC @noCollide
 
-
 	; if bottom of stairs is less than avatar y, no collide
 	LDA #STAIRS_DOWN_Y
 	CLC
@@ -236,11 +163,8 @@ CheckComplete:
 	CMP avatar_y
 	BCC @noCollide
 
-	; collision occurred, increment dungeon floor and go to dialogue state
-	LDX DUNGEON_FLOOR
-	INX
-	STX DUNGEON_FLOOR
-	JSR load_dialogue_screen
+	; collision occurred
+	JSR handle_stairs_down_collision
 
 	; set carry flag for check on return
 	SEC
@@ -251,9 +175,65 @@ CheckComplete:
 	RTS
 .endproc
 
+.proc handle_stairs_down_collision
+	; increment dungeon level/zone
+	JSR increment_dungeon_level
+
+	; check if we're on the first level of a new zone
+	LDX DUNGEON_LEVEL_ONES
+	CPX #$01
+	BEQ show_dialogue
+	CPX #$06
+	BEQ show_dialogue
+
+	; if not, go directly to next dungeon screen
+	JSR load_dungeon_screen
+	RTS
+
+show_dialogue:
+	JSR load_dialogue_screen
+	RTS
+.endproc
+
+.proc increment_dungeon_level
+	; load and increment dungeon level ones place
+	; (remember these vars are zero-indexed)
+	LDX DUNGEON_LEVEL_ONES
+	INX
+	STX DUNGEON_LEVEL_ONES
+
+	; if we hit 1 or 6 in the ones place, increment zone
+	CPX #$01
+	BEQ increment_zone
+	CPX #$06
+	BEQ increment_zone
+
+	; if we hit 10 in the ones place, increment tens place instead
+	CPX #$0A
+	BEQ increment_tens
+
+	; no need to increment zone or tens, we're done
+	RTS
+increment_tens:
+	LDX #$00
+	STX DUNGEON_LEVEL_ONES
+	LDX DUNGEON_LEVEL_TENS
+	INX
+	STX DUNGEON_LEVEL_TENS
+
+	RTS
+increment_zone:
+	LDX DUNGEON_ZONE
+	INX
+	STX DUNGEON_ZONE
+
+	RTS
+.endproc
+
 .import dungeon_increment_avatar_sprite_frame
-.import draw_open_treasure
 .import load_title_screen
 .import dungeon_logic
-.import sfx_chest_open
 .import load_dialogue_screen
+.import load_dungeon_screen
+.import handle_treasure_collision
+.import check_treasure_collisions

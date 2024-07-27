@@ -10,6 +10,7 @@ ca65 src\core\nmi.asm
 ca65 src\core\irq.asm
 ca65 src\core\controller.asm
 ca65 src\core\rng.asm
+ca65 src\core\decimal.asm
 
 :: Audio
 ca65 src/audio/famistudio_ca65.s
@@ -32,6 +33,7 @@ ca65 src\dungeon\player_sprite.asm
 ca65 src\dungeon\map_collision.asm
 ca65 src\dungeon\load_treasure.asm
 ca65 src\dungeon\draw_treasure.asm
+ca65 src\dungeon\treasure_logic.asm
 
 :: Dialogue
 ca65 src\dialogue\main.asm

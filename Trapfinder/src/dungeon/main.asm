@@ -4,12 +4,16 @@
 .segment "ZEROPAGE"
 .importzp screen_state, buttons, new_buttons
 
+.segment "BSS"
+.import SOFT_PPUMASK
+
 .segment "CODE"
 .export load_dungeon_screen
 .proc load_dungeon_screen
 	; disable PPU while we switch screens
 	LDX #%00
 	STX PPUMASK
+	STX SOFT_PPUMASK
 
 	; reset controller buttons
 	STX new_buttons
@@ -42,8 +46,8 @@
 	JSR load_avatar_sprite
 
 	; turn PPU back on
-	LDA PPUMASK_STANDARD
-	STA PPUMASK
+	LDA #PPUMASK_STANDARD
+	STA SOFT_PPUMASK
 
 	JSR audio_dungeon
 

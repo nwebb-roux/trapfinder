@@ -1,12 +1,13 @@
 .include "dialogue.inc"
 .include "digrams.inc"
 .include "../includes/constants.inc"
+.include "../macros/state.asm"
 
 .segment "ZEROPAGE"
-.importzp indirect_address, screen_state
+.importzp indirect_address
 
 .segment "BSS"
-.import DUNGEON_FLOOR, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION, DRAWBUFFER_OFFSET, SCRATCH_E
+.import DUNGEON_ZONE, COUNTER, SCRATCH_B, SCRATCH_C, SCRATCH_D, ANIMATION_FRAME, ANIMATION_LOCATION, DRAWBUFFER_OFFSET, SCRATCH_E
 
 .segment "CODE"
 .export init_background
@@ -90,7 +91,7 @@ attribute_loop:
 	STA ANIMATION_LOCATION
 
 	; load dungeon floor and double it to make it an index into the dialogue_locations lookup table
-	LDA DUNGEON_FLOOR
+	LDA DUNGEON_ZONE
 	ASL
 	TAX
 
@@ -289,10 +290,8 @@ done_with_frame:
 	INX
 	STX DRAWBUFFER_OFFSET
 
-	; set buffer draw flag in screen_state
-	LDA screen_state
-	ORA #%01000000
-	STA screen_state
+	; set buffer draw flag
+	SetBufferDrawFlag
 
 	RTS
 .endproc

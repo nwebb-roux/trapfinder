@@ -1,6 +1,9 @@
 .include "../includes/constants.inc"
 .import main
 
+.segment "BSS"
+.import SOFT_PPUMASK
+
 .segment "CODE"
 .export reset_handler
 .proc reset_handler
@@ -36,6 +39,9 @@
 	; set PPU control flags: NMI enabled, sprites from Pattern Table 0, background from Pattern Table 1
 	LDA #%10010000
 	STA PPUCTRL
+
+	LDA #PPUMASK_STANDARD
+	STA SOFT_PPUMASK
 
 	JMP main
 

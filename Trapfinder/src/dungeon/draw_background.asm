@@ -1,12 +1,12 @@
 .include "maps.inc"
+.include "status_bar.inc"
 .include "../includes/constants.inc"
 
 .segment "BSS"
-.import DUNGEON_FLOOR, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_SECOND_PASS, COUNTER
+.import DUNGEON_ZONE, DUNGEON_LEVEL_ONES, DUNGEON_LEVEL_TENS, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_SECOND_PASS, COUNTER, ASCII_RESULT, GOLD_PIECES, HEX_VALUE
 
 .segment "CODE"
-.export draw_dungeon_background
-.proc draw_dungeon_background
+.proc draw_status_bar
 	; set nametable address in PPU
 	; first, read PPUSTATUS to clear the PPU's address latch so we know we're doing a clean write
 	LDA PPUSTATUS
@@ -18,6 +18,143 @@
 	; then low byte
 	LDA #$00
 	STA PPUADDR
+
+	; init status bar loop vars
+	LDA #$FF
+	LDX #$00
+
+	; draw two rows and two more tiles of black
+empty_bar_loop:
+	STA PPUDATA
+	INX
+	CPX #$42
+	BNE empty_bar_loop
+
+	; draw the word "Zone:"
+	LDA #$BC
+	STA PPUDATA
+	LDA #$BD
+	STA PPUDATA
+	LDA #$BE
+	STA PPUDATA
+	LDA #$BF
+	STA PPUDATA
+	LDA #$FA
+	STA PPUDATA
+
+	; draw the zone number
+	LDX DUNGEON_ZONE
+	LDA zone_to_number_tile, X
+	STA PPUDATA
+
+	; draw twelve tiles of black
+	LDA #$FF
+	LDX #$00
+
+twelve_loop:
+	STA PPUDATA
+	INX
+	CPX #$0C
+	BNE twelve_loop
+
+	; draw the word "GP:"
+	LDA #$FB
+	STA PPUDATA
+	LDA #$FC
+	STA PPUDATA
+	LDA #$FA
+	STA PPUDATA
+
+	; draw GP count
+	LDA GOLD_PIECES
+    STA HEX_VALUE
+
+	JSR hex_to_ascii_8bit
+
+    LDX #$00
+
+draw_digit_loop:
+    LDY ASCII_RESULT, X
+    LDA level_to_number_tile, Y
+
+    STA PPUDATA
+
+    INX
+    CPX #$05
+    BNE draw_digit_loop
+
+	LDA level_to_number_tile
+	STA PPUDATA
+	STA PPUDATA
+
+	; fill rest of row with black and draw two more black tiles
+	LDA #$FF
+	LDX #$00
+
+post_gp_loop:
+	STA PPUDATA
+	INX
+	CPX #$04
+	BNE post_gp_loop
+
+	; draw word "Level:"
+	LDA #$CC
+	STA PPUDATA
+	LDA #$BF
+	STA PPUDATA
+	LDA #$CD
+	STA PPUDATA
+	LDA #$BF
+	STA PPUDATA
+	LDA #$CE
+	STA PPUDATA
+	LDA #$FA
+	STA PPUDATA
+
+	; draw the level number
+	LDX DUNGEON_LEVEL_TENS
+	LDA level_to_number_tile, X
+	STA PPUDATA
+	LDX DUNGEON_LEVEL_ONES
+	LDA level_to_number_tile, X
+	STA PPUDATA
+
+	; draw ten black tiles
+	LDA #$FF
+	LDX #$00
+
+ten_loop:
+	STA PPUDATA
+	INX
+	CPX #$0A
+	BNE ten_loop
+
+	; draw hearts (hardcoded three hearts now)
+	LDA #$FD
+	LDX #$00
+
+heart_loop:
+	STA PPUDATA
+	INX
+	CPX #$03
+	BNE heart_loop
+
+	; draw nine black tiles
+	LDA #$FF
+	LDX #$00
+
+nine_loop:
+	STA PPUDATA
+	INX
+	CPX #$09
+	BNE nine_loop
+
+	RTS
+.endproc
+
+.export draw_dungeon_background
+.proc draw_dungeon_background
+	JSR draw_status_bar
 
 	; reset X and COUNTER for looping
 	LDX #$00
@@ -46,7 +183,7 @@
 	LDA metatile_sprites, Y
 
 	; add dungeon floor offset
-	LDY DUNGEON_FLOOR
+	LDY DUNGEON_ZONE
 	CLC
 	ADC floor_tile_offsets, Y
 
@@ -115,14 +252,23 @@
 	; as it assumes PPUADDR is pointed to the attribute part
 	; (i.e. we just finished drawing the map part)
 	LDX #$00
+	LDA #%11111111
 
-@loop:
+bar_loop:
+	STA PPUDATA
+	INX
+	CPX #$08
+	BNE bar_loop
+
+	LDX #$00
+
+loop:
 	LDA SCREEN_MAP_ATTRIBUTES, X
 	CMP #$FF
 	BEQ Done
 	STA PPUDATA
 	INX
-	JMP @loop
+	JMP loop
 
 Done:
 	RTS
@@ -285,3 +431,5 @@ Done:
 
     RTS
 .endproc
+
+.import hex_to_ascii_8bit

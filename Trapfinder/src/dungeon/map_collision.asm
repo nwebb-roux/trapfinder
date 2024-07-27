@@ -30,8 +30,8 @@ CheckUp:
 	CLC
 	ADC #$02
 
-	; if it's 8, eject down
-	CMP #$08
+	; if it's 32, eject down
+	CMP #$20
 	BNE ContinueCheckUp
 	JSR eject_down
 	JMP CheckDown
@@ -40,6 +40,8 @@ ContinueCheckUp:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the top left point
@@ -96,6 +98,8 @@ ContinueCheckDown:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the bottom left point
@@ -150,6 +154,8 @@ ContinueCheckLeft:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the top left point
@@ -167,6 +173,8 @@ NoCollideLeft:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the bottom left point
@@ -204,6 +212,8 @@ ContinueCheckRight:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the top right point
@@ -221,6 +231,8 @@ NoCollideRight:
 	LSR
 	LSR
 	LSR
+	SEC
+	SBC #$02
 	STA collision_metatile_offset_2
 
 	; test the bottom right point

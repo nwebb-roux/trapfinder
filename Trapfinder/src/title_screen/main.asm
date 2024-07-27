@@ -1,12 +1,16 @@
 .include "../includes/constants.inc"
 .include "../macros/state.asm"
 
+.segment "BSS"
+.import SOFT_PPUMASK
+
 .segment "CODE"
 .export load_title_screen
 .proc load_title_screen
 	; disable PPU while we switch screens
 	LDX #%00
 	STX PPUMASK
+	STX SOFT_PPUMASK
 
 	SetTitleScreenState
 
@@ -24,8 +28,8 @@
 	JSR load_title_screen_jewel_sprite
 
 	; turn PPU back on
-	LDA PPUMASK_STANDARD
-	STA PPUMASK
+	LDA #PPUMASK_STANDARD
+	STA SOFT_PPUMASK
 
 	JSR audio_title_screen
 

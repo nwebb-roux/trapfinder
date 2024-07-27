@@ -35,3 +35,17 @@
 	AND screen_state
 	STA screen_state
 .endmacro
+
+.macro ClearBufferDrawFlag
+	; change bit 6 to 0 without changing the other bits
+	LDA #%10111111
+	AND screen_state
+	STA screen_state
+.endmacro
+
+.macro SetBufferDrawFlag
+	; change bit 6 to 1 without changing the other bits
+	LDA screen_state
+	ORA #%01000000
+	STA screen_state
+.endmacro

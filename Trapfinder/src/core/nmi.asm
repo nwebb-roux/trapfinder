@@ -8,7 +8,7 @@
 .import DRAWBUFFER
 
 .segment "BSS"
-.import DRAWBUFFER_OFFSET, STACK_POINTER
+.import DRAWBUFFER_OFFSET, STACK_POINTER, SOFT_PPUMASK
 
 .segment "CODE"
 .export nmi_handler
@@ -23,7 +23,7 @@ NoSecondByteIncrement:
 	BIT screen_state
 	BPL Return
 
-	; **** NMI INTERRUPT ****
+oam_dma:
 	; during each NMI interrupt, we update the sprite data in the PPU's OAM tables
 	; we do this using OAMDMA, a special automatic write of all 256 bytes of OAM
 	; OAMDMA starts at the current OAMADDR, so best practice is to initialize OAMADDR to 0
@@ -40,12 +40,14 @@ NoSecondByteIncrement:
 	; PPU cleanup section, don't understand this yet
 	LDA #%10010000	; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
 	STA PPUCTRL
-	LDA #%00011110	; enable sprites, enable background, no clipping on left side
+	;LDA #%00011110	; enable sprites, enable background, no clipping on left side
+	LDA SOFT_PPUMASK
 	STA PPUMASK
 	LDA #$00		; tell the PPU there's no background scrolling
 	STA PPUSCROLL
 	STA PPUSCROLL	; why twice? horizontal and vertical I think
 
+clear_render_flag:
 	; clear render flag so game logic will run again
 	ClearRenderFlag
 
@@ -111,6 +113,9 @@ draw_bytes_loop:
 	JMP draw_bytes_loop
 
 done_with_buffer:
+	; clear buffer draw flag
+	ClearBufferDrawFlag
+	
 	; reset original stack pointer
 	LDX STACK_POINTER
 	TXS
