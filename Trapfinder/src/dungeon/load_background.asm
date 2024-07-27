@@ -5,7 +5,7 @@
 .importzp indirect_address, indirect_address_2
 
 .segment "BSS"
-.import DUNGEON_FLOOR, DUNGEON_FLOOR_OFFSET, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, COUNTER, SCRATCH_B, SCREEN_MAP_LOCATION, COLLISION_TABLE, SCREEN_MAP_END, CURRENT_DECODE_VALUE, CURRENT_DECODE_LENGTH, METATILES_DECODED, CURRENT_DECODE_BYTE, SCRATCH_C, SCRATCH_D
+.import DUNGEON_ZONE, DUNGEON_ZONE_OFFSET, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, COUNTER, SCRATCH_B, SCREEN_MAP_LOCATION, COLLISION_TABLE, SCREEN_MAP_END, CURRENT_DECODE_VALUE, CURRENT_DECODE_LENGTH, METATILES_DECODED, CURRENT_DECODE_BYTE, SCRATCH_C, SCRATCH_D
 
 .segment "CODE"
 .proc check_current_codeword
@@ -129,15 +129,14 @@ bit_shift_done:
 .export load_dungeon_map
 .proc load_dungeon_map
 	; load dungeon floor (0-4) into X
-	LDX DUNGEON_FLOOR
+	LDX DUNGEON_ZONE
 
 	; use that as offset into top_and_bottom_superpattern_offsets_by_floor
 	; to get the offset into the top row superpattern table
 	LDA top_and_bottom_superpattern_offsets_by_floor, X
-	STA DUNGEON_FLOOR_OFFSET
+	STA DUNGEON_ZONE_OFFSET
 
 	; set loop variables
-	;LDX DUNGEON_FLOOR_OFFSET
 	TAX
 	LDY #$00
 	STY SCREEN_MAP_LOCATION
@@ -161,28 +160,11 @@ top_row_loop:
 
 	; if we're here, either we decompressed all 16 metatiles or we finished the current byte and need to load the next
 
+	; if METATILES_DECODED is 16, we're done with the top row
 	LDY METATILES_DECODED
-	; if METATILES_DECODED is 32, we're done with the top rows
-	CPY #$20
+	CPY #$10
 	BEQ done_with_top
 
-	; if we're here, we still have more metatiles to decode
-
-	; if METATILES_DECODED is 16, reset X and set second-time flag before continuing
-	; so we can start from the beginning of the top row map data again
-	; (we draw the entire top row twice)
-	CPY #$10
-	BNE next_byte_and_loop
-	
-	LDX DUNGEON_FLOOR_OFFSET
-	STX SCRATCH_B
-
-	LDY #$01
-	STY SCRATCH_D
-
-	JMP top_row_loop
-
-next_byte_and_loop:
 	; reload offset counter in X and increment
 	LDX SCRATCH_B
 	INX
@@ -191,15 +173,15 @@ next_byte_and_loop:
 	JMP top_row_loop
 
 done_with_top:
-	; save 32 to screen map location
+	; save 16 to screen map location
 	STY SCREEN_MAP_LOCATION
 
 	; load dungeon floor (0-4) into X
-	LDX DUNGEON_FLOOR
+	LDX DUNGEON_ZONE
 
 	; use that as offset into floor_offsets to get part of the offset into the superpattern table
 	LDA floor_offsets, X
-	STA DUNGEON_FLOOR_OFFSET
+	STA DUNGEON_ZONE_OFFSET
 
 	; reset X (row counter) for next loop and second-pass flag
 	LDX #$00
@@ -213,7 +195,7 @@ mid_row_loop:
 
 	; add offset for what floor we're on by looking it up in floor_offsets table
 	CLC
-	ADC DUNGEON_FLOOR_OFFSET
+	ADC DUNGEON_ZONE_OFFSET
 
 	; multiply by two because the table is a double-byte array
 	ASL
@@ -273,12 +255,12 @@ done_with_row:
 	INX
 	STX SCRATCH_B
 
-	; if less than 11, do another row
-	CPX #$0B
+	; if less than 10, do another row
+	CPX #$0A
 	BNE mid_row_loop
 
 	; reset X and Y for next loop
-	LDX DUNGEON_FLOOR_OFFSET
+	LDX DUNGEON_ZONE_OFFSET
 	LDY SCREEN_MAP_LOCATION
 
 bottom_row_loop:
@@ -292,14 +274,8 @@ bottom_row_loop:
 	INX
 	INY
 
-	; if Y is 224, reset X to run through the same bottom row superpattern again
-	CPY #$E0
-	BNE @continue_bottom_row_loop
-	LDX DUNGEON_FLOOR_OFFSET
-
-@continue_bottom_row_loop:
-	; loop until screen map location is 240
-	CPY #$F0
+	; loop until screen map location is 208
+	CPY #$D0
 	BNE bottom_row_loop
 
 	; make sure SCREEN_MAP_END is set to $FF

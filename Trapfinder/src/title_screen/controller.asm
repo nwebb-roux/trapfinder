@@ -4,7 +4,7 @@
 .importzp buttons, new_buttons, avatar_y
 
 .segment "BSS"
-.import DUNGEON_FLOOR
+.import DUNGEON_ZONE, DUNGEON_LEVEL_ONES, DUNGEON_LEVEL_TENS, GOLD_PIECES
 
 .segment "CODE"
 .export title_screen_handle_controller
@@ -29,7 +29,11 @@ CheckStart:
 	BEQ CheckUp
 	JSR initialize_rng
 	LDX #$00
-	STX DUNGEON_FLOOR
+	STX GOLD_PIECES
+	STX DUNGEON_ZONE
+	STX DUNGEON_LEVEL_TENS
+	LDX #$01
+	STX DUNGEON_LEVEL_ONES
 	JSR load_dialogue_screen
 	RTS
 CheckUp:

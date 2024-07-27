@@ -1,15 +1,15 @@
 .segment "RODATA"
 dungeon_palettes:
-	; cavern
-	.byte $00,$2D,$1A,$29, $00,$2D,$10,$0F, $00,$2D,$10,$0F, $00,$2D,$10,$0F
-	; dungeon
-	.byte $00,$2D,$1A,$0F, $00,$2D,$10,$0F, $00,$2D,$10,$0F, $00,$2D,$10,$0F
-	; marble
-	.byte $20,$10,$00,$0F, $20,$10,$32,$00, $20,$10,$1C,$00, $20,$1C,$31,$19
-	; palace
-	.byte $37,$15,$27,$39, $37,$27,$17,$06, $37,$12,$21,$33, $37,$27,$17,$06
-	; hell
-	.byte $0F,$06,$16,$07, $0F,$06,$16,$27, $0F,$15,$27,$39, $0F,$38,$27,$16
+	; cavern - grass, stone, unused, status bar
+	.byte $00,$2D,$1A,$29, $00,$2D,$10,$0F, $00,$2D,$10,$0F, $00,$15,$20,$0F
+	; dungeon - mossy bricks, stone and pillars, unused, status bar
+	.byte $00,$2D,$1A,$0F, $00,$2D,$10,$0F, $00,$2D,$10,$0F, $00,$15,$20,$0F
+	; marble - statues, columns, jugs, status bar
+	.byte $20,$10,$00,$0F, $20,$10,$32,$00, $20,$10,$1C,$00, $20,$15,$20,$0F
+	; palace - red rug, wood, blue rug, status bar
+	.byte $37,$15,$27,$39, $37,$27,$17,$06, $37,$12,$21,$33, $37,$15,$20,$0F
+	; hell - hot brick, ?, ?, status bar
+	.byte $0F,$06,$16,$07, $0F,$06,$16,$27, $0F,$15,$27,$39, $0F,$15,$20,$0F
 
 sprite_palettes:
 	; character, chest, unused, stairs
