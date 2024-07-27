@@ -8,6 +8,206 @@
 .import DUNGEON_ZONE, DUNGEON_ZONE_OFFSET, SCREEN_MAP, SCREEN_MAP_ATTRIBUTES, SCREEN_MAP_ATTRIBUTES_END, ATTRIBUTE_MASK, COUNTER, SCRATCH_B, SCREEN_MAP_LOCATION, COLLISION_TABLE, SCREEN_MAP_END, CURRENT_DECODE_VALUE, CURRENT_DECODE_LENGTH, METATILES_DECODED, CURRENT_DECODE_BYTE, SCRATCH_C, SCRATCH_D
 
 .segment "CODE"
+.export load_dungeon_map
+.proc load_dungeon_map
+	JSR load_top_rows
+	JSR load_middle_rows
+	JSR load_bottom_rows
+	JSR load_collision_data
+	JSR load_dungeon_map_attributes
+	RTS
+.endproc
+
+.proc load_top_rows
+	; load dungeon floor (0-4) into X
+	LDX DUNGEON_ZONE
+
+	; use that as offset into top_and_bottom_superpattern_offsets_by_floor
+	; to get the offset into the top row superpattern table
+	LDA top_and_bottom_superpattern_offsets_by_floor, X
+	STA DUNGEON_ZONE_OFFSET
+
+	; set loop variables
+	TAX
+	LDY #$00
+	STY SCREEN_MAP_LOCATION
+
+	; initialize decompression variables to 0
+	STY CURRENT_DECODE_VALUE
+	STY CURRENT_DECODE_LENGTH
+	STY METATILES_DECODED
+	STY SCRATCH_D ; flag for whether we're drawing the second top row (0 no, 1 yes)
+
+top_row_loop:
+	; get compressed byte
+	LDA top_row_superpatterns, X
+	STA CURRENT_DECODE_BYTE
+
+	; save offset value in X
+	STX SCRATCH_B
+
+	; decompress byte
+	JSR decompress_byte
+
+	; if we're here, either we decompressed all 16 metatiles or we finished the current byte and need to load the next
+
+	; if METATILES_DECODED is 16, we're done with the top row
+	LDY METATILES_DECODED
+	CPY #$10
+	BEQ done_with_top
+
+	; reload offset counter in X and increment
+	LDX SCRATCH_B
+	INX
+
+	; loop again
+	JMP top_row_loop
+
+done_with_top:
+	; save 16 to screen map location
+	STY SCREEN_MAP_LOCATION
+
+	RTS
+.endproc
+
+.proc load_middle_rows
+	; load dungeon floor (0-4) into X
+	LDX DUNGEON_ZONE
+
+	; use that as offset into floor_offsets to get part of the offset into the superpattern table
+	LDA floor_offsets, X
+	STA DUNGEON_ZONE_OFFSET
+
+	; reset X (row counter) for next loop and second-pass flag
+	LDX #$00
+	STX SCRATCH_B
+	STX SCRATCH_D
+
+mid_row_loop:
+	; load random # 0-15 in A (note: also screws with Y!)
+	JSR lfsr
+	AND #%00001111
+
+	; add offset for what floor we're on
+	CLC
+	ADC DUNGEON_ZONE_OFFSET
+
+	; multiply by two because the table is a double-byte array
+	ASL
+
+	; put offset into Y
+	TAY
+
+	; load high byte of superpattern location from table
+	; (stored reversed in table, i.e. high low instead of the usual low high)
+	LDA superpattern_locations, Y
+	STA indirect_address+1
+
+	; load low byte
+	INY
+	LDA superpattern_locations, Y
+	STA indirect_address
+
+	; reset Y and COUNTER for next loop
+	LDY #$00
+	STY SCRATCH_C
+	STY CURRENT_DECODE_VALUE
+	STY CURRENT_DECODE_LENGTH
+	STY METATILES_DECODED
+
+@metatileLoop:
+	; use postindexing to load the data pointed to
+	; by the superpattern table location in indirect_address
+	; (i.e. load the next byte of compressed data from the superpatterns table)
+	LDA (indirect_address),Y
+	STA CURRENT_DECODE_BYTE
+
+	; save Y (offset counter)
+	STY SCRATCH_C
+
+	; decompress the byte
+	JSR decompress_byte
+
+	; if we're here, either we decompressed all 16 metatiles or we finished the current byte and need to load the next
+
+	; if METATILES_DECODED is 16, we're done
+	LDY METATILES_DECODED
+	CPY #$10
+	BEQ done_with_row
+	
+	; if we're here, we still have more metatiles to decode
+
+	; reload offset counter in Y and increment
+	LDY SCRATCH_C
+	INY
+
+	; loop again
+	JMP @metatileLoop
+
+done_with_row:
+	; increment row counter
+	LDX SCRATCH_B
+	INX
+	STX SCRATCH_B
+
+	; if less than 10, do another row
+	CPX #$0A
+	BNE mid_row_loop
+
+	RTS
+.endproc
+
+.proc load_bottom_rows
+	; reset X and Y for next loop
+	LDX DUNGEON_ZONE_OFFSET
+	LDY SCREEN_MAP_LOCATION
+
+bottom_row_loop:
+	; get metatile
+	LDA bottom_row_superpatterns, X
+
+	; write to screen map
+	STA SCREEN_MAP, Y
+
+	; increment counters and loop until end of screen map location in Y
+	INX
+	INY
+
+	; if Y is 192, reset X to 0 so we use the same data again for the second bottom row
+	CPY #$C0
+	BNE no_reset_x
+
+	LDX DUNGEON_ZONE_OFFSET
+
+no_reset_x:
+	; loop until screen map location is 208
+	CPY #$D0
+	BNE bottom_row_loop
+
+	; make sure SCREEN_MAP_END is set to $FF
+	LDA #$FF
+	STA SCREEN_MAP_END
+
+	RTS
+.endproc
+
+.proc load_collision_data
+	; reset X for loop
+	LDX #$00
+
+@load_collision_data_loop:
+	LDA metatile_collisions, X
+	CMP #$FF
+	BEQ @end_collision_load
+	STA COLLISION_TABLE, X
+	INX
+	JMP @load_collision_data_loop
+
+@end_collision_load:
+	RTS
+.endproc
+
+
 .proc check_current_codeword
 	; X: current codeword length
 	; if length is 2, return immediately (there are no codewords of length 2)
@@ -126,178 +326,6 @@ bit_shift_done:
 	RTS
 .endproc
 
-.export load_dungeon_map
-.proc load_dungeon_map
-	; load dungeon floor (0-4) into X
-	LDX DUNGEON_ZONE
-
-	; use that as offset into top_and_bottom_superpattern_offsets_by_floor
-	; to get the offset into the top row superpattern table
-	LDA top_and_bottom_superpattern_offsets_by_floor, X
-	STA DUNGEON_ZONE_OFFSET
-
-	; set loop variables
-	TAX
-	LDY #$00
-	STY SCREEN_MAP_LOCATION
-
-	; initialize decompression variables to 0
-	STY CURRENT_DECODE_VALUE
-	STY CURRENT_DECODE_LENGTH
-	STY METATILES_DECODED
-	STY SCRATCH_D ; flag for whether we're drawing the second top row (0 no, 1 yes)
-
-top_row_loop:
-	; get compressed byte
-	LDA top_row_superpatterns, X
-	STA CURRENT_DECODE_BYTE
-
-	; save offset value in X
-	STX SCRATCH_B
-
-	; decompress byte
-	JSR decompress_byte
-
-	; if we're here, either we decompressed all 16 metatiles or we finished the current byte and need to load the next
-
-	; if METATILES_DECODED is 16, we're done with the top row
-	LDY METATILES_DECODED
-	CPY #$10
-	BEQ done_with_top
-
-	; reload offset counter in X and increment
-	LDX SCRATCH_B
-	INX
-
-	; loop again
-	JMP top_row_loop
-
-done_with_top:
-	; save 16 to screen map location
-	STY SCREEN_MAP_LOCATION
-
-	; load dungeon floor (0-4) into X
-	LDX DUNGEON_ZONE
-
-	; use that as offset into floor_offsets to get part of the offset into the superpattern table
-	LDA floor_offsets, X
-	STA DUNGEON_ZONE_OFFSET
-
-	; reset X (row counter) for next loop and second-pass flag
-	LDX #$00
-	STX SCRATCH_B
-	STX SCRATCH_D
-
-mid_row_loop:
-	; load random # 0-15 in A (note: also screws with Y!)
-	JSR lfsr
-	AND #%00001111
-
-	; add offset for what floor we're on by looking it up in floor_offsets table
-	CLC
-	ADC DUNGEON_ZONE_OFFSET
-
-	; multiply by two because the table is a double-byte array
-	ASL
-
-	; put offset into Y
-	TAY
-
-	; load high byte of superpattern location from table
-	; (stored reversed in table, i.e. high low instead of the usual low high)
-	LDA superpattern_locations, Y
-	STA indirect_address+1
-
-	; load low byte
-	INY
-	LDA superpattern_locations, Y
-	STA indirect_address
-
-	; reset Y and COUNTER for next loop
-	LDY #$00
-	STY SCRATCH_C
-	STY CURRENT_DECODE_VALUE
-	STY CURRENT_DECODE_LENGTH
-	STY METATILES_DECODED
-
-@metatileLoop:
-	; use postindexing to load the data pointed to
-	; by the superpattern table location in indirect_address
-	; (i.e. load the next byte of compressed data from the superpatterns table)
-	LDA (indirect_address),Y
-	STA CURRENT_DECODE_BYTE
-
-	; save Y (offset counter)
-	STY SCRATCH_C
-
-	; decompress the byte
-	JSR decompress_byte
-
-	; if we're here, either we decompressed all 16 metatiles or we finished the current byte and need to load the next
-
-	; if METATILES_DECODED is 16, we're done
-	LDY METATILES_DECODED
-	CPY #$10
-	BEQ done_with_row
-	
-	; if we're here, we still have more metatiles to decode
-
-	; reload offset counter in Y and increment
-	LDY SCRATCH_C
-	INY
-
-	; loop again
-	JMP @metatileLoop
-
-done_with_row:
-	; increment row counter
-	LDX SCRATCH_B
-	INX
-	STX SCRATCH_B
-
-	; if less than 10, do another row
-	CPX #$0A
-	BNE mid_row_loop
-
-	; reset X and Y for next loop
-	LDX DUNGEON_ZONE_OFFSET
-	LDY SCREEN_MAP_LOCATION
-
-bottom_row_loop:
-	; get metatile
-	LDA bottom_row_superpatterns, X
-
-	; write to screen map
-	STA SCREEN_MAP, Y
-
-	; increment counters and loop until end of screen map location in Y
-	INX
-	INY
-
-	; loop until screen map location is 208
-	CPY #$D0
-	BNE bottom_row_loop
-
-	; make sure SCREEN_MAP_END is set to $FF
-	LDA #$FF
-	STA SCREEN_MAP_END
-
-	; reset X for loop
-	LDX #$00
-
-@load_collision_data_loop:
-	LDA metatile_collisions, X
-	CMP #$FF
-	BEQ @end_collision_load
-	STA COLLISION_TABLE, X
-	INX
-	JMP @load_collision_data_loop
-
-@end_collision_load:
-	RTS
-.endproc
-
-.export load_dungeon_map_attributes
 .proc load_dungeon_map_attributes
 	; initialize counters
 	LDX #$00
