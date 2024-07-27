@@ -33,6 +33,7 @@ ca65 src\dungeon\player_sprite.asm
 ca65 src\dungeon\map_collision.asm
 ca65 src\dungeon\load_treasure.asm
 ca65 src\dungeon\draw_treasure.asm
+ca65 src\dungeon\stairs.asm
 ca65 src\dungeon\treasure_logic.asm
 
 :: Dialogue

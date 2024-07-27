@@ -133,7 +133,7 @@ CheckComplete:
 
 draw_digit_loop:
     LDY ASCII_RESULT, X
-    LDA level_to_number_tile, Y
+    LDA zero_indexed_number_tiles, Y
 
     STA $0103, X
 
@@ -142,7 +142,7 @@ draw_digit_loop:
     BNE draw_digit_loop
 
     ; write two zeroes
-    LDA level_to_number_tile
+    LDA zero_indexed_number_tiles
     STA $0108
     STA $0109
 

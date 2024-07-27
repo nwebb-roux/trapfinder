@@ -44,7 +44,7 @@ empty_bar_loop:
 
 	; draw the zone number
 	LDX DUNGEON_ZONE
-	LDA zone_to_number_tile, X
+	LDA zero_indexed_number_tiles+1, X
 	STA PPUDATA
 
 	; draw twelve tiles of black
@@ -75,7 +75,7 @@ twelve_loop:
 
 draw_digit_loop:
     LDY ASCII_RESULT, X
-    LDA level_to_number_tile, Y
+    LDA zero_indexed_number_tiles, Y
 
     STA PPUDATA
 
@@ -83,7 +83,7 @@ draw_digit_loop:
     CPX #$05
     BNE draw_digit_loop
 
-	LDA level_to_number_tile
+	LDA zero_indexed_number_tiles
 	STA PPUDATA
 	STA PPUDATA
 
@@ -113,10 +113,10 @@ post_gp_loop:
 
 	; draw the level number
 	LDX DUNGEON_LEVEL_TENS
-	LDA level_to_number_tile, X
+	LDA zero_indexed_number_tiles, X
 	STA PPUDATA
 	LDX DUNGEON_LEVEL_ONES
-	LDA level_to_number_tile, X
+	LDA zero_indexed_number_tiles, X
 	STA PPUDATA
 
 	; draw ten black tiles
@@ -274,162 +274,6 @@ Done:
 	RTS
 .endproc
 
-.export dungeon_draw_stairs_up
-.proc dungeon_draw_stairs_up
-    ; **** top left tile (x, y) ****
-	; write Y
-    LDA #STAIRS_UP_Y
-    STA $02E0
-
-	; write X
-    LDA #STAIRS_UP_X
-    STA $02E3
-
-	; write tile location
-	LDX #$50
-	STX $02E1
-
-	; write sprite attributes
-	LDY #%00000011
-	STY $02E2
-	
-    ; **** top right tile (x + 8, y) ****
-	; write Y
-    LDA #STAIRS_UP_Y
-    STA $02E4
-
-	; add 8 to X and write
-    LDA #STAIRS_UP_X
-    CLC
-    ADC #$08
-    STA $02E7
-
-	; increment tile location and write
-	INX
-	STX $02E5
-
-	; write sprite attributes
-	STY $02E6
-
-    ; **** bottom left tile (x, y + 8) ****
-	; add 8 to Y and write
-    LDA #STAIRS_UP_Y
-    CLC
-    ADC #$08
-    STA $02E8
-
-	; write X (the original, not the +8 version)
-    LDA #STAIRS_UP_X
-    STA $02EB
-
-	; increment tile location and write
-	INX
-	STX $02E9
-
-	; write sprite attributes
-	STY $02EA
-
-    ; **** bottom right tile (x + 8, y + 8) ****
-	; add 8 to Y and write
-    LDA #STAIRS_UP_Y
-    CLC
-    ADC #$08
-    STA $02EC
-
-	; add 8 to X and write
-    LDA #STAIRS_UP_X
-    CLC
-    ADC #$08
-    STA $02EF
-
-	; increment tile location and write
-	INX
-	STX $02ED
-
-	; write sprite attributes
-	STY $02EE
-
-    RTS
-.endproc
-
-.export dungeon_draw_stairs_down
-.proc dungeon_draw_stairs_down
-    ; **** top left tile (x, y) ****
-	; write Y
-    LDA #STAIRS_DOWN_Y
-    STA $02F0
-
-	; write X
-    LDA #STAIRS_DOWN_X
-    STA $02F3
-
-	; write tile location
-	LDX #$54
-	STX $02F1
-
-	; write sprite attributes
-	LDY #%00000011
-	STY $02F2
-	
-    ; **** top right tile (x + 8, y) ****
-	; write Y
-    LDA #STAIRS_DOWN_Y
-    STA $02F4
-
-	; write X
-    LDA #STAIRS_DOWN_X
-
-	; add 8 to X and write
-    CLC
-    ADC #$08
-    STA $02F7
-
-	; increment tile location and write
-	INX
-	STX $02F5
-
-	; write sprite attributes
-	STY $02F6
-
-    ; **** bottom left tile (x, y + 8) ****
-	; add 8 to Y and write
-    LDA #STAIRS_DOWN_Y
-    CLC
-    ADC #$08
-    STA $02F8
-
-	; write X (the original, not the +8 version)
-    LDA #STAIRS_DOWN_X
-    STA $02FB
-
-	; increment tile location and write
-	INX
-	STX $02F9
-
-	; write sprite attributes
-	STY $02FA
-
-    ; **** bottom right tile (x + 8, y + 8) ****
-	; add 8 to Y and write
-    LDA #STAIRS_DOWN_Y
-    CLC
-    ADC #$08
-    STA $02FC
-
-	; add 8 to X and write
-    LDA #STAIRS_DOWN_X
-    CLC
-    ADC #$08
-    STA $02FF
-
-	; increment tile location and write
-	INX
-	STX $02FD
-
-	; write sprite attributes
-	STY $02FE
-
-    RTS
-.endproc
-
 .import hex_to_ascii_8bit
+.import dungeon_draw_stairs_down
+.import dungeon_draw_stairs_up
