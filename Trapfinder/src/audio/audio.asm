@@ -2,7 +2,7 @@
 .importzp FAMISTUDIO_SFX_CH0
 
 .segment "BSS"
-.import DUNGEON_ZONE
+.import DUNGEON_ZONE, DUNGEON_LEVEL_ONES
 
 .segment "CODE"
 .export audio_init
@@ -37,6 +37,17 @@
 
 .export audio_dungeon
 .proc audio_dungeon
+	; check if we're on the first level of a new zone
+	LDX DUNGEON_LEVEL_ONES
+	CPX #$01
+	BEQ change_music
+	CPX #$06
+	BEQ change_music
+
+	; if not, do nothing
+	RTS
+
+change_music:
 	JSR famistudio_music_stop
 	LDX DUNGEON_ZONE
 	LDA dungeon_tracks, X
